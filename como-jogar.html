@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dominó - Como Jogar</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* ===== BARRA DE ROLAGEM PERSONALIZADA ===== */
+        /* Chrome, Edge, Safari */
+        ::-webkit-scrollbar {
+            width: 10px;
+            background: #0d2e15; /* Fundo verde escuro */
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #0d2e15;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #f7d44a, #eebf3e); /* Dourado */
+            border-radius: 10px;
+            border: 2px solid #0d2e15;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fde066;
+        }
+
+        /* Firefox */
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #f7d44a #0d2e15;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #2a8a44 0%, #1D6130 50%, #0d2e15 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            position: relative;
+            padding-top: 80px; /* Espaço para o header fixo */
+        }
+
+        /* Fundo com dominós */
+        .domino-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            perspective: 1000px;
+        }
+
+        .domino-piece {
+            position: absolute;
+            background: linear-gradient(135deg, #1a5e30, #0d2e15);
+            border: 1px solid #2a8a44;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 15px rgba(0,0,0,0.5);
+            transform: rotate(20deg) skew(-10deg);
+            opacity: 0.3;
+        }
+
+        .domino-piece::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            height: 2px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .domino-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .d1 { bottom: -50px; left: -50px; width: 180px; height: 360px; transform: rotate(-30deg); z-index: 1;}
+        .d2 { top: 30%; left: -80px; width: 120px; height: 240px; transform: rotate(15deg); opacity: 0.2;}
+        .d3 { bottom: -80px; right: -80px; width: 200px; height: 400px; transform: rotate(15deg); opacity: 0.2;}
+        .d4 { top: 20%; right: -120px; width: 150px; height: 300px; transform: rotate(-20deg); opacity: 0.3;}
+        .d5 { bottom: 20%; right: 10%; width: 100px; height: 200px; transform: rotate(45deg); opacity: 0.1;}
+
+        /* Cabeçalho com botão de voltar */
+        .game-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 20px 40px;
+            z-index: 10;
+            background: transparent;
+        }
+
+        /* Botão Voltar no lugar do coração */
+        .back-icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(35px, 5vw, 45px);
+            height: clamp(35px, 5vw, 45px);
+            border-radius: 50%;
+            border: 1px solid rgba(247, 212, 74, 0.5);
+            background: rgba(13, 46, 21, 0.5);
+            backdrop-filter: blur(5px);
+            color: #f7d44a;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-icon-btn:hover {
+            background: #f7d44a;
+            color: #1a4a2a;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(247, 212, 74, 0.4);
+        }
+
+        .back-icon-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            transition: transform 0.3s;
+        }
+
+        .back-icon-btn:hover svg {
+            transform: translateX(-3px);
+        }
+
+        /* ===== CONTEÚDO PRINCIPAL ===== */
+        .how-to-container {
+            max-width: 1100px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        /* Título Fantasma */
+        .ghost-title {
+            position: absolute;
+            top: -110px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(80px, 15vw, 200px);
+            font-weight: 800;
+            color: rgba(255,255,255,0.03);
+            letter-spacing: clamp(5px, 2vw, 20px);
+            z-index: -1;
+            text-transform: uppercase;
+            pointer-events: none;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        h1.main-title {
+            font-size: clamp(2rem, 6vw, 4.5rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: clamp(2px, 1.5vw, 5px);
+            margin-bottom: 40px;
+            color: white;
+            line-height: 1.1;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            margin-top: 20px;
+        }
+
+        /* Grid de Passos */
+        .steps-grid {
+            display: flex;
+            justify-content: center;
+            gap: clamp(10px, 2vw, 20px);
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        /* Card Passo */
+        .step-card {
+            width: clamp(220px, 22vw, 280px);
+            background: linear-gradient(145deg, #14401f 0%, #0d2e15 100%);
+            border: 1px solid rgba(247, 212, 74, 0.3);
+            border-radius: 12px;
+            padding: 30px 15px 20px;
+            position: relative;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s;
+        }
+
+        .step-card:hover {
+            border-color: #f7d44a;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 20px rgba(247,212,74,0.2);
+        }
+
+        /* Número do passo */
+        .step-number {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: #f7d44a;
+            color: #102b17;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+
+        /* Imagem (Dominós) */
+        .step-image {
+            height: 80px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .mini-domino {
+            width: 35px;
+            height: 70px;
+            background: linear-gradient(135deg, #e8e8e8, #b0b0b0);
+            border-radius: 6px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            border: 1px solid #888;
+        }
+
+        .mini-domino::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 2px;
+            background: #333;
+        }
+
+        .mini-domino.dark {
+            background: linear-gradient(135deg, #14401f, #0d2e15);
+            border: 1px solid #2a8a44;
+        }
+
+        .mini-domino.dark::after {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .mini-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .mini-dot.white { background: white; box-shadow: 0 0 3px rgba(0,0,0,0.5); }
+        .mini-dot.gold { background: #f7d44a; box-shadow: 0 0 5px rgba(247,212,74,0.8); }
+
+        /* Título do Passo */
+        .step-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .step-desc {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.4;
+        }
+
+        /* ===== RESPONSIVIDADE EXTREMA ===== */
+        @media (max-width: 1024px) {
+            .step-card {
+                width: 45%;
+                flex: 1 1 40%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-header {
+                padding: 15px 20px;
+            }
+
+            .ghost-title {
+                top: -50px;
+                font-size: 25vw;
+            }
+
+            .steps-grid {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .step-card {
+                width: 90%;
+                max-width: 350px;
+                flex: none;
+            }
+        }
+
+        @media (max-width: 400px) {
+            h1.main-title {
+                font-size: 1.6rem;
+                margin-bottom: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fundo com Dominós -->
+    <div class="domino-bg">
+        <div class="domino-piece d1">
+            <div class="domino-dot" style="top: 20px; left: 20px;"></div>
+            <div class="domino-dot" style="top: 20px; left: 60px;"></div>
+            <div class="domino-dot" style="top: 20px; left: 100px;"></div>
+            <div class="domino-dot" style="top: 60px; left: 40px;"></div>
+            <div class="domino-dot" style="top: 100px; left: 80px;"></div>
+            <div class="domino-dot" style="top: 140px; left: 20px;"></div>
+        </div>
+        <div class="domino-piece d2">
+            <div class="domino-dot" style="top: 40px; left: 40px;"></div>
+            <div class="domino-dot" style="top: 80px; left: 40px;"></div>
+        </div>
+        <div class="domino-piece d3">
+            <div class="domino-dot" style="top: 50px; left: 50px;"></div>
+            <div class="domino-dot" style="top: 50px; left: 100px;"></div>
+            <div class="domino-dot" style="top: 120px; left: 50px;"></div>
+        </div>
+        <div class="domino-piece d4">
+            <div class="domino-dot" style="top: 30px; left: 30px;"></div>
+            <div class="domino-dot" style="top: 30px; left: 70px;"></div>
+            <div class="domino-dot" style="top: 90px; left: 30px;"></div>
+        </div>
+    </div>
+
+    <!-- Header com botão de voltar -->
+    <header class="game-header">
+        <a href="index.html" class="back-icon-btn" aria-label="Voltar ao Início">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+        </a>
+    </header>
+
+    <div class="how-to-container">
+        
+        <div class="ghost-title">DOMINÓ</div>
+
+        <h1 class="main-title">Como Jogar</h1>
+
+        <div class="steps-grid">
+            <!-- Passo 1 -->
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-image">
+                    <div class="mini-domino dark"><div class="mini-dot gold" style="top: 15px; left: 14px;"></div><div class="mini-dot gold" style="top: 45px; left: 14px;"></div></div>
+                    <div class="mini-domino dark" style="margin-left: -10px;"><div class="mini-dot gold" style="top: 15px; left: 14px;"></div><div class="mini-dot gold" style="top: 45px; left: 14px;"></div></div>
+                </div>
+                <div class="step-title">As Cartas Viradas</div>
+                <div class="step-desc">Todas as peças começam viradas para baixo.</div>
+            </div>
+
+            <!-- Passo 2 -->
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-image">
+                    <div class="mini-domino"><div class="mini-dot white" style="top: 15px; left: 10px;"></div><div class="mini-dot white" style="top: 15px; left: 20px;"></div><div class="mini-dot white" style="top: 45px; left: 10px;"></div></div>
+                    <div class="mini-domino dark" style="margin-left: -10px;"><div class="mini-dot gold" style="top: 15px; left: 14px;"></div><div class="mini-dot gold" style="top: 45px; left: 14px;"></div></div>
+                </div>
+                <div class="step-title">Vire Duas Peças</div>
+                <div class="step-desc">Clique em duas peças para virá-las e revelar os dominós.</div>
+            </div>
+
+            <!-- Passo 3 -->
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-image">
+                    <div class="mini-domino" style="box-shadow: 0 0 20px rgba(247,212,74,0.8); border-color: #f7d44a;">
+                        <div class="mini-dot white" style="top: 15px; left: 10px;"></div>
+                        <div class="mini-dot white" style="top: 15px; left: 20px;"></div>
+                        <div class="mini-dot white" style="top: 45px; left: 10px;"></div>
+                        <div class="mini-dot white" style="top: 45px; left: 20px;"></div>
+                    </div>
+                    <div class="mini-domino" style="margin-left: -10px; box-shadow: 0 0 20px rgba(247,212,74,0.8); border-color: #f7d44a;">
+                        <div class="mini-dot white" style="top: 15px; left: 10px;"></div>
+                        <div class="mini-dot white" style="top: 15px; left: 20px;"></div>
+                        <div class="mini-dot white" style="top: 45px; left: 10px;"></div>
+                        <div class="mini-dot white" style="top: 45px; left: 20px;"></div>
+                    </div>
+                </div>
+                <div class="step-title">Encontre os Pares</div>
+                <div class="step-desc">Se as peças forem iguais, elas permanecem viradas.</div>
+            </div>
+
+            <!-- Passo 4 -->
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-image">
+                    <div class="mini-domino"><div class="mini-dot white" style="top: 15px; left: 10px;"></div><div class="mini-dot white" style="top: 15px; left: 20px;"></div><div class="mini-dot white" style="top: 45px; left: 10px;"></div></div>
+                    <div class="mini-domino" style="margin-left: -10px;"><div class="mini-dot white" style="top: 15px; left: 10px;"></div><div class="mini-dot white" style="top: 45px; left: 10px;"></div></div>
+                </div>
+                <div class="step-title">Não é um Par?</div>
+                <div class="step-desc">As peças viram novamente. Tente lembrar a posição delas!</div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

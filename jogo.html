@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dominó - Escolha a Dificuldade</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* ===== BARRA DE ROLAGEM PERSONALIZADA - TEMA DOMINÓ ===== */
+        ::-webkit-scrollbar {
+            width: 10px;
+            background: #0d2e15;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d2e15;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #f7d44a, #eebf3e);
+            border-radius: 10px;
+            border: 2px solid #0d2e15;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fde066;
+        }
+
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: #f7d44a #0d2e15;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: radial-gradient(circle at center, #2a8a44 0%, #1D6130 50%, #0d2e15 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Fundo com dominós */
+        .domino-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            perspective: 1000px;
+        }
+
+        .domino-piece {
+            position: absolute;
+            background: linear-gradient(135deg, #1a5e30, #0d2e15);
+            border: 1px solid #2a8a44;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 15px rgba(0,0,0,0.5);
+            transform: rotate(20deg) skew(-10deg);
+            opacity: 0.3;
+        }
+
+        .domino-piece::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            height: 2px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .domino-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .d1 { bottom: -50px; left: -50px; width: 180px; height: 360px; transform: rotate(-30deg); z-index: 1;}
+        .d2 { top: 30%; left: -80px; width: 120px; height: 240px; transform: rotate(15deg); opacity: 0.2;}
+        .d3 { bottom: -80px; right: -80px; width: 200px; height: 400px; transform: rotate(15deg); opacity: 0.2;}
+        .d4 { top: 20%; right: -120px; width: 150px; height: 300px; transform: rotate(-20deg); opacity: 0.3;}
+        .d5 { bottom: 20%; right: 10%; width: 100px; height: 200px; transform: rotate(45deg); opacity: 0.1;}
+
+        /* Cabeçalho com botão de voltar */
+        .game-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 20px 40px;
+            z-index: 10;
+            background: transparent;
+        }
+
+        .back-icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(35px, 5vw, 45px);
+            height: clamp(35px, 5vw, 45px);
+            border-radius: 50%;
+            border: 1px solid rgba(247, 212, 74, 0.5);
+            background: rgba(13, 46, 21, 0.5);
+            backdrop-filter: blur(5px);
+            color: #f7d44a;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-icon-btn:hover {
+            background: #f7d44a;
+            color: #1a4a2a;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(247, 212, 74, 0.4);
+        }
+
+        .back-icon-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            transition: transform 0.3s;
+        }
+
+        .back-icon-btn:hover svg {
+            transform: translateX(-3px);
+        }
+
+        /* ===== CONTEÚDO PRINCIPAL ===== */
+        .difficulty-container {
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            margin-top: 60px;
+            padding-bottom: 30px;
+        }
+
+        .ghost-title {
+            position: absolute;
+            top: -120px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(80px, 15vw, 200px);
+            font-weight: 800;
+            color: rgba(255,255,255,0.03);
+            letter-spacing: clamp(5px, 2vw, 20px);
+            z-index: -1;
+            text-transform: uppercase;
+            pointer-events: none;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        h1.main-title {
+            font-size: clamp(1.8rem, 5vw, 3.5rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: clamp(2px, 1.5vw, 5px);
+            margin-bottom: clamp(30px, 6vw, 60px);
+            color: white;
+            line-height: 1;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .diff-options-grid {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: clamp(10px, 2vw, 25px);
+            flex-wrap: wrap;
+            margin-bottom: clamp(30px, 6vw, 60px);
+            width: 100%;
+        }
+
+        .diff-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: clamp(140px, 25vw, 240px);
+            height: clamp(140px, 20vw, 220px);
+            background: linear-gradient(145deg, #14401f 0%, #0d2e15 100%);
+            border: 1px solid rgba(247, 212, 74, 0.3);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            flex: 1 1 auto;
+            max-width: 280px;
+        }
+
+        .diff-option::before {
+            content: '';
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.05) 2px, transparent 3px);
+            background-size: 12px 12px;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            transform: rotate(-30deg);
+        }
+
+        .diff-option:hover {
+            transform: translateY(-5px);
+            border-color: #f7d44a;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 20px rgba(247,212,74,0.2);
+            background: linear-gradient(145deg, #1a5e30 0%, #0f3a1b 100%);
+        }
+
+        .diff-option:hover::before {
+            opacity: 0.8;
+        }
+
+        .stars {
+            display: flex;
+            gap: 4px;
+            margin-bottom: clamp(8px, 1.5vw, 15px);
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+        }
+
+        .star {
+            color: #f7d44a;
+            text-shadow: 0 0 5px rgba(247,212,74,0.6);
+        }
+
+        .star-off {
+            color: rgba(255,255,255,0.2);
+            text-shadow: none;
+        }
+
+        .diff-name {
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: clamp(1px, 0.5vw, 2px);
+            color: white;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .separator-line {
+            width: clamp(20px, 4vw, 30px);
+            height: 2px;
+            background: #f7d44a;
+            margin-bottom: 10px;
+        }
+
+        .diff-desc {
+            font-size: clamp(0.65rem, 1.5vw, 0.85rem);
+            font-weight: 500;
+            color: rgba(255,255,255,0.9);
+            line-height: 1.4;
+            padding: 0 8px;
+            text-align: center;
+            min-height: 3.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 700px) {
+            .diff-options-grid {
+                flex-direction: column;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .diff-option {
+                width: 100%;
+                max-width: 320px;
+                height: 160px;
+                flex: 0 0 auto;
+            }
+
+            .diff-desc {
+                min-height: 2.4em;
+                font-size: 0.85rem;
+            }
+
+            .game-header {
+                padding: 15px 20px;
+            }
+
+            .ghost-title {
+                top: -40px;
+                font-size: 25vw;
+            }
+
+            h1.main-title {
+                font-size: 1.8rem;
+                margin-bottom: 30px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .diff-option {
+                height: 150px;
+                max-width: 280px;
+            }
+
+            .diff-name {
+                font-size: 1.3rem;
+            }
+
+            h1.main-title {
+                font-size: 1.4rem;
+                margin-bottom: 25px;
+            }
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            .difficulty-container {
+                margin-top: 20px;
+            }
+            .diff-options-grid {
+                flex-direction: row;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+            .diff-option {
+                height: 130px;
+                width: 200px;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="domino-bg">
+        <div class="domino-piece d1">
+            <div class="domino-dot" style="top: 20px; left: 20px;"></div>
+            <div class="domino-dot" style="top: 20px; left: 60px;"></div>
+            <div class="domino-dot" style="top: 20px; left: 100px;"></div>
+            <div class="domino-dot" style="top: 60px; left: 40px;"></div>
+            <div class="domino-dot" style="top: 100px; left: 80px;"></div>
+            <div class="domino-dot" style="top: 140px; left: 20px;"></div>
+        </div>
+        <div class="domino-piece d2">
+            <div class="domino-dot" style="top: 40px; left: 40px;"></div>
+            <div class="domino-dot" style="top: 80px; left: 40px;"></div>
+        </div>
+        <div class="domino-piece d3">
+            <div class="domino-dot" style="top: 50px; left: 50px;"></div>
+            <div class="domino-dot" style="top: 50px; left: 100px;"></div>
+            <div class="domino-dot" style="top: 120px; left: 50px;"></div>
+        </div>
+        <div class="domino-piece d4">
+            <div class="domino-dot" style="top: 30px; left: 30px;"></div>
+            <div class="domino-dot" style="top: 30px; left: 70px;"></div>
+            <div class="domino-dot" style="top: 90px; left: 30px;"></div>
+        </div>
+    </div>
+
+    <header class="game-header">
+        <a href="index.html" class="back-icon-btn" aria-label="Voltar ao Início">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+        </a>
+    </header>
+
+    <div class="difficulty-container">
+        
+        <div class="ghost-title">DOMINÓ</div>
+
+        <h1 class="main-title">Escolha o Nível</h1>
+
+        <div class="diff-options-grid">
+            <a href="partida.html?dif=facil" class="diff-option" data-diff="facil">
+                <div class="stars">
+                    <span class="star">★</span>
+                    <span class="star-off">★</span>
+                    <span class="star-off">★</span>
+                </div>
+                <div class="diff-name">Fácil</div>
+                <div class="separator-line"></div>
+                <div class="diff-desc">Oponente joga de forma aleatória</div>
+            </a>
+
+            <a href="partida.html?dif=medio" class="diff-option" data-diff="medio">
+                <div class="stars">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star-off">★</span>
+                </div>
+                <div class="diff-name">Médio</div>
+                <div class="separator-line"></div>
+                <div class="diff-desc">Descarta peças pesadas e duplas</div>
+            </a>
+
+            <a href="partida.html?dif=dificil" class="diff-option" data-diff="dificil">
+                <div class="stars">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+                <div class="diff-name">Difícil</div>
+                <div class="separator-line"></div>
+                <div class="diff-desc">Calcula pontas, bloqueia e trava o jogo</div>
+            </a>
+        </div>
+
+    </div>
+
+</body>
+</html>

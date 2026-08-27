@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dominó - Partida</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Bungee&display=swap');
+
+        :root {
+            background: radial-gradient(circle at center, #2a8a44 0%, #1D6130 50%, #0d2e15 100%);
+            --felt-deep: oklch(0.24 0.05 158);
+            --wood: oklch(0.44 0.08 55);
+            --wood-dark: oklch(0.29 0.06 50);
+            --ivory: oklch(0.96 0.017 92);
+            --ivory-shade: oklch(0.88 0.025 88);
+            --pip: oklch(0.22 0.02 60);
+            --gold: oklch(0.82 0.15 82);
+            --radius: 0.75rem;
+            --gradient-felt: radial-gradient(ellipse at 50% 20%, color-mix(in oklab, var(--felt) 92%, white 8%), var(--felt) 45%, var(--felt-deep) 100%);
+            --gradient-wood: linear-gradient(160deg, var(--wood), var(--wood-dark));
+            --gradient-ivory: linear-gradient(160deg, oklch(0.99 0.012 95), var(--ivory) 55%, var(--ivory-shade));
+            --shadow-tile: 0 2px 0 0 color-mix(in oklab, var(--pip) 35%, transparent), 0 6px 14px -6px oklch(0 0 0 / 0.6);
+            --shadow-lift: 0 18px 40px -12px oklch(0 0 0 / 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body,
+        #root {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--gradient-felt);
+            background-attachment: fixed;
+            color: oklch(0.96 0.012 95);
+            overscroll-behavior: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100dvh;
+            width: 100%;
+            padding: 8px;
+            gap: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 640px) {
+            .game-container {
+                padding: 12px;
+                gap: 12px;
+            }
+        }
+
+        /* ===== HEADER MELHORADO ===== */
+        .game-header {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            border-radius: 16px;
+            background: oklch(0.18 0.04 160 / 85%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid oklch(0.65 0.08 150 / 30%);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 oklch(1 0 0 / 8%);
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, oklch(0.82 0.15 82 / 10%), transparent 60%);
+            pointer-events: none;
+        }
+
+        /* ===== BOTÃO VOLTAR - MESMO ESTILO DO COMO JOGAR ===== */
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: oklch(1 0 0 / 6%);
+            color: oklch(0.92 0.03 120);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 26px;
+            font-weight: 300;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid oklch(1 0 0 / 6%);
+            position: relative;
+            z-index: 1;
+            text-decoration: none;
+        }
+
+        .btn-icon:hover {
+            background: oklch(0.82 0.15 82 / 20%);
+            border-color: var(--gold);
+            color: var(--gold);
+            transform: scale(1.05);
+        }
+
+        .btn-icon:active {
+            transform: scale(0.92);
+        }
+
+        .btn-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            transition: transform 0.3s;
+        }
+
+        .btn-icon:hover svg {
+            transform: translateX(-3px);
+        }
+
+        @media (min-width: 640px) {
+            .btn-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 28px;
+            }
+            .btn-icon svg {
+                width: 26px;
+                height: 26px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .btn-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+            .btn-icon svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        .header-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            min-width: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-top-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .header-difficulty {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: oklch(0.7 0.06 130);
+            background: oklch(0 0 0 / 25%);
+            padding: 2px 12px;
+            border-radius: 20px;
+            border: 1px solid oklch(0.5 0.05 140 / 20%);
+            white-space: nowrap;
+        }
+
+        .header-score-target {
+            font-size: 10px;
+            font-weight: 600;
+            color: oklch(0.65 0.05 120);
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        .header-divider-vertical {
+            width: 1px;
+            height: 20px;
+            background: oklch(1 0 0 / 10%);
+        }
+
+        .header-players {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header-player {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 4px 10px 4px 6px;
+            border-radius: 30px;
+            background: oklch(0 0 0 / 15%);
+            border: 1px solid oklch(1 0 0 / 5%);
+            transition: all 0.2s;
+        }
+
+        .header-player.active-turn {
+            border-color: var(--gold);
+            background: oklch(0.82 0.15 82 / 12%);
+            box-shadow: 0 0 20px oklch(0.82 0.15 82 / 10%);
+        }
+
+        .header-player .player-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid oklch(0.7 0.05 130 / 40%);
+            background: oklch(0.3 0.055 158 / 80%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .header-player .player-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .header-player .player-avatar.ai-avatar {
+            font-size: 18px;
+            background: oklch(0.2 0.04 60);
+            border-color: oklch(0.5 0.05 50);
+        }
+
+        .header-player .player-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: oklch(0.85 0.03 120);
+        }
+
+        .header-player .player-score {
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--gold);
+            letter-spacing: -0.02em;
+            min-width: 24px;
+            text-align: center;
+            font-feature-settings: "tnum";
+        }
+
+        .header-player .player-score-label {
+            font-size: 9px;
+            font-weight: 600;
+            color: oklch(0.5 0.05 120);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-left: -2px;
+        }
+
+        .header-vs {
+            font-size: 14px;
+            font-weight: 700;
+            color: oklch(0.4 0.04 140);
+            letter-spacing: 0.05em;
+            padding: 0 2px;
+        }
+
+        @media (max-width: 480px) {
+            .game-header {
+                padding: 6px 10px;
+                gap: 6px;
+                border-radius: 12px;
+            }
+            .header-player {
+                padding: 2px 6px 2px 4px;
+                gap: 4px;
+                font-size: 11px;
+            }
+            .header-player .player-avatar {
+                width: 24px;
+                height: 24px;
+            }
+            .header-player .player-name {
+                font-size: 10px;
+            }
+            .header-player .player-score {
+                font-size: 14px;
+                min-width: 18px;
+            }
+            .header-player .player-score-label {
+                font-size: 7px;
+            }
+            .header-vs {
+                font-size: 10px;
+            }
+            .header-difficulty {
+                font-size: 8px;
+                padding: 1px 8px;
+            }
+            .header-score-target {
+                font-size: 8px;
+            }
+            .header-divider-vertical {
+                height: 14px;
+            }
+            .header-top-row {
+                gap: 6px;
+            }
+            .header-players {
+                gap: 4px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .header-player .player-name {
+                display: none;
+            }
+            .header-player .player-score-label {
+                display: none;
+            }
+            .header-vs {
+                font-size: 8px;
+            }
+            .header-player {
+                padding: 2px 4px;
+            }
+        }
+
+        /* ===== MÃO DO OPONENTE MELHORADA ===== */
+        .opponent-hand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-shrink: 0;
+            padding: 8px 12px;
+            min-height: 52px;
+            background: oklch(0.18 0.04 160 / 60%);
+            border-radius: 14px;
+            border: 1px solid oklch(0.65 0.08 150 / 20%);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .opponent-hand::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            background: linear-gradient(90deg, transparent, oklch(0.82 0.15 82 / 6%), transparent);
+            pointer-events: none;
+        }
+
+        .opponent-hand .opponent-tile-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .opponent-hand .opponent-tile-wrapper .domino-tile {
+            border-color: oklch(0.65 0.08 150 / 30%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 oklch(1 0 0 / 10%);
+            border-radius: 6px;
+        }
+
+        .opponent-hand .opponent-tile-wrapper .domino-tile .face-down-inner .dot {
+            border-color: oklch(0.7 0.05 130 / 50%);
+            background: oklch(0.35 0.05 50 / 30%);
+            width: 35%;
+            height: 35%;
+        }
+
+        .opponent-hand .opponent-tile-wrapper .domino-tile .face-down-inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .opponent-hand .opponent-tile-wrapper .domino-tile .face-down-inner::after {
+            content: '';
+            position: absolute;
+            inset: 20% 15%;
+            border-radius: 50%;
+            border: 2px solid oklch(0.7 0.05 130 / 25%);
+            background: repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 2px,
+                    oklch(0.7 0.05 130 / 10%) 2px,
+                    oklch(0.7 0.05 130 / 10%) 4px);
+        }
+
+        .opponent-hand .opponent-count {
+            margin-left: 4px;
+            border-radius: 9999px;
+            background: oklch(0 0 0 / 30%);
+            padding: 2px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: oklch(0.85 0.03 120);
+            border: 1px solid oklch(0.5 0.05 140 / 15%);
+            font-feature-settings: "tnum";
+            min-width: 28px;
+            text-align: center;
+            letter-spacing: 0.02em;
+        }
+
+        .opponent-hand .opponent-label {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: oklch(0.5 0.05 120);
+            margin-right: 2px;
+        }
+
+        @media (max-width: 480px) {
+            .opponent-hand {
+                padding: 4px 8px;
+                min-height: 38px;
+                gap: 4px;
+                border-radius: 10px;
+            }
+            .opponent-hand .opponent-count {
+                font-size: 10px;
+                padding: 1px 8px;
+                min-width: 20px;
+            }
+            .opponent-hand .opponent-label {
+                font-size: 7px;
+            }
+        }
+
+        /* ===== FIM MÃO DO OPONENTE ===== */
+
+        .board-wrapper {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            border-radius: var(--radius);
+            border: 1px solid oklch(0.45 0.05 150 / 45%);
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: oklch(0.82 0.15 82 / 45%) transparent;
+        }
+
+        .board-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .board-wrapper::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .board-wrapper::-webkit-scrollbar-thumb {
+            background: oklch(0.82 0.15 82 / 40%);
+            border-radius: 9999px;
+        }
+
+        .board {
+            width: 100%;
+            min-height: 100%;
+            padding: 6px;
+            background: radial-gradient(ellipse at 50% 40%, color-mix(in oklab, var(--felt) 88%, white 12%), var(--felt) 60%, var(--felt-deep));
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, .45);
+            display: flex;
+            flex-wrap: wrap;
+            align-content: center;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .drop-zone {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 2px dashed oklch(0.82 0.15 82 / 60%);
+            background: oklch(0.82 0.15 82 / 10%);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: oklch(0.82 0.15 82 / 80%);
+            flex-shrink: 0;
+            transition: all 0.2s;
+            font-size: 10px;
+            min-width: 40px;
+            min-height: 40px;
+            animation: glow-pulse 1.8s ease-in-out infinite;
+        }
+
+        .drop-zone.active {
+            border-color: var(--gold);
+            background: oklch(0.82 0.15 82 / 25%);
+            color: var(--gold);
+            cursor: pointer;
+        }
+
+        .drop-zone.hint {
+            cursor: default;
+            border-style: dashed;
+            border-color: oklch(0.82 0.15 82 / 38%);
+            background: oklch(0.82 0.15 82 / 6%);
+            color: oklch(0.82 0.15 82 / 55%);
+            animation: glow-pulse-soft 2.6s ease-in-out infinite;
+        }
+
+        .drop-zone.hover {
+            border-color: var(--gold);
+            background: oklch(0.82 0.15 82 / 40%);
+            color: var(--gold);
+            transform: scale(1.05);
+        }
+
+        .drop-zone.empty-hint {
+            font-size: 12px;
+            padding: 0 16px;
+            border-style: solid;
+            border-color: oklch(1 0 0 / 20%);
+            color: oklch(1 0 0 / 50%);
+            background: transparent;
+            min-width: 80px;
+            min-height: 60px;
+            animation: none;
+        }
+
+        .domino-tile {
+            position: relative;
+            flex-shrink: 0;
+            user-select: none;
+            border-radius: calc(var(--unit, 44) * 0.16);
+            border: 1px solid color-mix(in oklab, var(--pip) 22%, transparent);
+            transition: transform 0.15s, opacity 0.15s;
+            touch-action: none;
+            cursor: default;
+            background: var(--gradient-ivory);
+            box-shadow: var(--shadow-tile);
+        }
+
+        .domino-tile.face-down {
+            background: rgb(203, 202, 202);
+        }
+
+        .domino-tile.highlighted {
+            box-shadow: var(--shadow-tile), 0 0 0 2.5px var(--gold);
+        }
+
+        .domino-tile.selected {
+            box-shadow: var(--shadow-lift), 0 0 0 3px var(--gold);
+            transform: scale(1.02);
+        }
+
+        .domino-tile.dimmed {
+            opacity: 0.45;
+            filter: saturate(0.5);
+        }
+
+        .domino-tile.clickable {
+            cursor: pointer;
+        }
+
+        .domino-tile.clickable:not(.dimmed):hover {
+            transform: translateY(-2px);
+        }
+
+        .domino-tile .face-down-inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .domino-tile .face-down-inner .dot {
+            border-radius: 50%;
+            border: 2px solid color-mix(in oklab, var(--gold) 70%, transparent);
+            width: 40%;
+            height: 40%;
+        }
+
+        .domino-half {
+            display: grid;
+            flex: 1;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            padding: calc(var(--unit, 44) * 0.14);
+        }
+
+        .domino-half .pip {
+            place-self: center;
+            border-radius: 50%;
+            background: var(--pip);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, .45), 0 1px 1px rgba(0, 0, 0, .25);
+        }
+
+        .domino-divider {
+            background: color-mix(in oklab, var(--pip) 45%, transparent);
+            flex-shrink: 0;
+        }
+
+        .status-bar {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .status-bar .status-text {
+            border-radius: 8px;
+            background: oklch(0.3 0.055 158 / 70%);
+            padding: 6px 12px;
+            font-size: 12px;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 640px) {
+            .status-bar .status-text {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+
+        .status-bar .actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-bar .actions .boneyard-count {
+            display: none;
+            border-radius: 8px;
+            background: oklch(0.3 0.055 158 / 70%);
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+
+        @media (min-width: 640px) {
+            .status-bar .actions .boneyard-count {
+                display: inline;
+            }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--gold);
+            color: oklch(0.24 0.04 60);
+            height: 36px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-secondary {
+            background: oklch(0.34 0.05 158);
+            color: oklch(0.96 0.012 95);
+        }
+
+        .btn-secondary:hover {
+            background: oklch(0.4 0.05 158);
+        }
+
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+            height: 30px;
+        }
+
+        .player-hand {
+            flex-shrink: 0;
+            overflow-x: auto;
+            border-radius: var(--radius);
+            border: 1px solid oklch(0.45 0.05 150 / 45%);
+            padding: 8px;
+            background: var(--gradient-wood);
+            min-height: 70px;
+        }
+
+        .player-hand .hand-inner {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 6px;
+            min-width: fit-content;
+        }
+
+        @media (min-width: 640px) {
+            .player-hand .hand-inner {
+                gap: 8px;
+            }
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            scrollbar-width: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: oklch(0 0 0 / 60%);
+            backdrop-filter: blur(4px);
+            padding: 16px;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 400px;
+            border-radius: var(--radius);
+            border: 1px solid oklch(0.45 0.05 150 / 45%);
+            background: oklch(0.3 0.055 158);
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--shadow-lift);
+        }
+
+        .modal .trophy {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        .modal h2 {
+            font-size: 24px;
+            font-family: 'Bungee', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        .modal p {
+            margin-top: 8px;
+            font-size: 14px;
+            color: oklch(0.8 0.03 120);
+        }
+
+        .modal .actions {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .modal .actions .btn {
+            width: 100%;
+        }
+
+        .floating-tile {
+            position: fixed;
+            pointer-events: none;
+            z-index: 50;
+            transform: translate(-50%, -60%) rotate(-4deg);
+            will-change: left, top;
+        }
+
+        @keyframes tile-pop {
+            0% {
+                transform: scale(0.7) rotate(-6deg);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes glow-pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 color-mix(in oklab, var(--gold) 55%, transparent);
+            }
+            50% {
+                box-shadow: 0 0 0 6px color-mix(in oklab, var(--gold) 0%, transparent);
+            }
+        }
+
+        @keyframes glow-pulse-soft {
+            0%,
+            100% {
+                opacity: 0.55;
+            }
+            50% {
+                opacity: 0.95;
+            }
+        }
+
+        .animate-tile-pop {
+            animation: tile-pop 0.28s cubic-bezier(0.22, 1.2, 0.4, 1) both;
+        }
+
+        @media (max-width: 400px) {
+            .game-container {
+                padding: 4px;
+                gap: 4px;
+            }
+            .status-bar .status-text {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+            .btn {
+                font-size: 11px;
+                padding: 4px 10px;
+                height: 28px;
+            }
+            .player-hand {
+                padding: 4px;
+                min-height: 50px;
+            }
+            .player-hand .hand-inner {
+                gap: 4px;
+            }
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            .game-container {
+                padding: 4px;
+                gap: 4px;
+            }
+            .opponent-hand {
+                padding: 4px 8px;
+                min-height: 32px;
+            }
+            .status-bar .status-text {
+                font-size: 10px;
+                padding: 2px 8px;
+            }
+            .btn {
+                font-size: 10px;
+                padding: 2px 8px;
+                height: 24px;
+            }
+            .player-hand {
+                padding: 4px;
+                min-height: 40px;
+            }
+            .player-hand .hand-inner {
+                gap: 3px;
+            }
+            .board {
+                padding: 4px;
+                gap: 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script>
+        // ================================================================
+        // ===== DOMINO LIB - BASEADO NO CÓDIGO ORIGINAL DO LOVABLE =====
+        // ================================================================
+
+        const TARGET_SCORE = 100;
+
+        function createDeck() {
+            const tiles = [];
+            for (let a = 0; a <= 6; a++) {
+                for (let b = a; b <= 6; b++) {
+                    tiles.push({ id: `${a}-${b}`, a, b });
+                }
+            }
+            return tiles;
+        }
+
+        function shuffle(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function pipSum(tiles) {
+            return tiles.reduce((s, t) => s + t.a + t.b, 0);
+        }
+
+        function ends(chain) {
+            if (chain.length === 0) return { left: null, right: null };
+            return { left: chain[0].a, right: chain[chain.length - 1].b };
+        }
+
+        function canPlay(tile, chain) {
+            if (chain.length === 0) return { left: true, right: true };
+            const { left, right } = ends(chain);
+            return {
+                left: tile.a === left || tile.b === left,
+                right: tile.a === right || tile.b === right,
+            };
+        }
+
+        function isPlayable(tile, chain) {
+            const c = canPlay(tile, chain);
+            return c.left || c.right;
+        }
+
+        function hasAnyMove(hand, chain) {
+            return hand.some((t) => isPlayable(t, chain));
+        }
+
+        function handAvailability(hand, chain) {
+            if (chain.length === 0) {
+                const any = hand.length > 0;
+                return { left: any, right: any };
+            }
+            const { left, right } = ends(chain);
+            const canLeft = hand.some((t) => t.a === left || t.b === left);
+            const canRight = hand.some((t) => t.a === right || t.b === right);
+            return { left: canLeft, right: canRight };
+        }
+
+        function place(chain, tile, side) {
+            const isDouble = tile.a === tile.b;
+            if (chain.length === 0) return [{ id: tile.id, a: tile.a, b: tile.b, isDouble }];
+            const { left, right } = ends(chain);
+            if (side === 'left') {
+                const oriented = tile.b === left ?
+                    { a: tile.a, b: tile.b } :
+                    { a: tile.b, b: tile.a };
+                return [{ id: tile.id, ...oriented, isDouble }, ...chain];
+            }
+            const oriented = tile.a === right ?
+                { a: tile.a, b: tile.b } :
+                { a: tile.b, b: tile.a };
+            return [...chain, { id: tile.id, ...oriented, isDouble }];
+        }
+
+        function removeTile(hand, id) {
+            return hand.filter((t) => t.id !== id);
+        }
+
+        function findStarter(hands) {
+            let best = null;
+            ['human', 'ai'].forEach((p) => {
+                hands[p].forEach((t) => {
+                    const isDouble = t.a === t.b;
+                    const rank = (isDouble ? 100 : 0) + t.a + t.b;
+                    if (!best || rank > best.rank) best = { player: p, tile: t, rank };
+                });
+            });
+            return { player: best.player, tile: best.tile };
+        }
+
+        function newRound(difficulty, scores) {
+            scores = scores || { human: 0, ai: 0 };
+            const deck = shuffle(createDeck());
+            const human = deck.slice(0, 7);
+            const ai = deck.slice(7, 14);
+            const boneyard = deck.slice(14);
+            const hands = { human, ai };
+            const starter = findStarter(hands);
+
+            return {
+                chain: [],
+                hands,
+                boneyard,
+                turn: starter.player,
+                difficulty,
+                status: 'playing',
+                winner: null,
+                roundPoints: 0,
+                scores,
+                log: [
+                    starter.player === 'human' ?
+                    'Você começa com a maior peça.' :
+                    'O oponente começa com a maior peça.',
+                ],
+            };
+        }
+
+        function checkRoundEnd(state) {
+            const humanOut = state.hands.human.length === 0;
+            const aiOut = state.hands.ai.length === 0;
+
+            if (humanOut || aiOut) {
+                const winner = humanOut ? 'human' : 'ai';
+                const loser = humanOut ? 'ai' : 'human';
+                const pts = pipSum(state.hands[loser]);
+                return {
+                    ...state,
+                    status: 'round-over',
+                    winner,
+                    roundPoints: pts,
+                    scores: { ...state.scores, [winner]: state.scores[winner] + pts },
+                    log: [
+                        ...state.log,
+                        winner === 'human' ?
+                        `Você bateu! +${pts} pontos.` :
+                        `Oponente bateu! +${pts} para ele.`,
+                    ],
+                };
+            }
+
+            const stuck = state.boneyard.length === 0 &&
+                !hasAnyMove(state.hands.human, state.chain) &&
+                !hasAnyMove(state.hands.ai, state.chain);
+
+            if (stuck) {
+                const h = pipSum(state.hands.human);
+                const a = pipSum(state.hands.ai);
+                if (h === a) {
+                    return { ...state, status: 'round-over', winner: 'draw', roundPoints: 0, log: [...state.log,
+                            'Jogo fechado: empate.'
+                        ] };
+                }
+                const winner = h < a ? 'human' : 'ai';
+                const pts = Math.max(h, a);
+                return {
+                    ...state,
+                    status: 'round-over',
+                    winner,
+                    roundPoints: pts,
+                    scores: { ...state.scores, [winner]: state.scores[winner] + pts },
+                    log: [
+                        ...state.log,
+                        `Jogo fechado! ${winner === 'human' ? 'Você venceu' : 'Oponente venceu'} por menos pontos (+${pts}).`,
+                    ],
+                };
+            }
+
+            return state;
+        }
+
+        // ================================================================
+        // ===== IA CORRIGIDA - ESTIMATIVA APRIMORADA =====
+        // ================================================================
+
+        function aiChooseMove(state) {
+            const hand = state.hands.ai;
+            const chain = state.chain;
+
+            // Coleta todas as opções jogáveis
+            const options = [];
+            hand.forEach((t) => {
+                const c = canPlay(t, chain);
+                if (c.left) options.push({ tile: t, side: 'left' });
+                if (c.right && chain.length > 0) options.push({ tile: t, side: 'right' });
+            });
+
+            if (options.length === 0) return null;
+
+            // ===== DIFICULDADE FÁCIL: ALEATÓRIO =====
+            if (state.difficulty === 'facil') {
+                return options[Math.floor(Math.random() * options.length)];
+            }
+
+            // ===== MÉDIO E DIFÍCIL: HEURÍSTICA INTELIGENTE (SEM TRAPAÇA) =====
+
+            // 1. Conta quantas peças de cada número existem no jogo (incluindo mãos e monte)
+            // INFORMAÇÃO DISPONÍVEL PARA A IA: sua própria mão, o monte, e as peças já jogadas
+            function countAvailableNumbers(aiHand, boneyard, chain) {
+                const counts = [0, 0, 0, 0, 0, 0, 0];
+
+                // Peças da IA
+                aiHand.forEach(t => {
+                    counts[t.a]++;
+                    counts[t.b]++;
+                });
+
+                // Peças do monte
+                boneyard.forEach(t => {
+                    counts[t.a]++;
+                    counts[t.b]++;
+                });
+
+                // Peças já jogadas no tabuleiro
+                chain.forEach(t => {
+                    counts[t.a]++;
+                    counts[t.b]++;
+                });
+
+                return counts;
+            }
+
+            // 2. Calcula quantas peças de um número ainda estão disponíveis
+            // (baseado apenas no que a IA pode ver)
+            function getAvailableCount(number, aiHand, boneyard, chain) {
+                const counts = countAvailableNumbers(aiHand, boneyard, chain);
+                return counts[number] || 0;
+            }
+
+            // 3. Avalia o quão "seguro" é deixar uma ponta com determinado número
+            // Quanto MENOS peças desse número disponíveis, MAIS seguro
+            function safetyScore(number, aiHand, boneyard, chain) {
+                const available = getAvailableCount(number, aiHand, boneyard, chain);
+                // Quanto menos peças desse número disponíveis, mais seguro
+                // (menos chance do oponente ter e jogar nessa ponta)
+                const maxPossible = 8; // máximo de ocorrências de um número (0-6 com duplas)
+                // Inverte: se tem poucas peças, a ponta é mais segura
+                return Math.max(1, Math.min(10, 10 - (available / maxPossible) * 10));
+            }
+
+            // 4. Avalia a flexibilidade da mão após jogar a peça
+            function handFlexibilityScore(handAfter, chainAfter) {
+                if (handAfter.length === 0) return 100; // Bateu!
+                const { left, right } = ends(chainAfter);
+                let canPlayLeft = 0;
+                let canPlayRight = 0;
+                handAfter.forEach(t => {
+                    if (t.a === left || t.b === left) canPlayLeft++;
+                    if (t.a === right || t.b === right) canPlayRight++;
+                });
+                // Quanto mais opções, melhor
+                return canPlayLeft + canPlayRight;
+            }
+
+            // 5. ESTIMA a probabilidade do oponente ter peças de um número
+            // (sem olhar a mão dele - usa apenas informação pública)
+            // VERSÃO APRIMORADA: usa contagem real de ocorrências
+            function estimateOpponentChance(number, aiHand, boneyard, chain) {
+                const visible = getAvailableCount(number, aiHand, boneyard, chain);
+                const totalOccurrences = 8; // Cada número aparece 8 vezes no dominó duplo-6
+                const unknownOccurrences = totalOccurrences - visible;
+
+                // Quanto mais ocorrências desconhecidas, maior a chance do oponente ter
+                // Retorna um valor que representa o "perigo" de deixar esse número aberto
+                return unknownOccurrences;
+            }
+
+            // 6. Função de pontuação principal
+            function scoreOption(opt) {
+                const { tile, side } = opt;
+                let score = 0;
+
+                // Bônus base: valor da peça
+                score += tile.a + tile.b;
+
+                // Bônus extra para carroças (duplas)
+                if (tile.a === tile.b) {
+                    score += 5;
+                }
+
+                // Simula o próximo estado
+                const nextChain = place(chain, tile, side);
+                const nextEnds = ends(nextChain);
+                const newLeft = nextEnds.left;
+                const newRight = nextEnds.right;
+
+                // Calcula a mão restante da IA
+                const remainingHand = removeTile(hand, tile.id);
+
+                // SEGURANÇA DAS PONTAS: prefere deixar números com poucas peças disponíveis
+                const leftSafety = safetyScore(newLeft, remainingHand, state.boneyard, nextChain);
+                const rightSafety = safetyScore(newRight, remainingHand, state.boneyard, nextChain);
+                score += (leftSafety + rightSafety) * 1.5;
+
+                // FLEXIBILIDADE DA MÃO: prefere jogadas que deixam a mão com mais opções
+                const flexibility = handFlexibilityScore(remainingHand, nextChain);
+                score += flexibility * 2;
+
+                // BÔNUS EXTRA PARA DIFÍCIL: estimativa avançada
+                if (state.difficulty === 'dificil') {
+                    // Estima quantas peças do número o oponente pode ter
+                    const opponentLeft = estimateOpponentChance(newLeft, remainingHand, state.boneyard, nextChain);
+                    const opponentRight = estimateOpponentChance(newRight, remainingHand, state.boneyard, nextChain);
+
+                    // Quanto MENOS o oponente puder jogar na ponta, MELHOR
+                    // Usa a estimativa de ocorrências desconhecidas
+                    score -= (opponentLeft + opponentRight) * 0.6;
+
+                    // Bônus se ambas as pontas forem iguais (fecha o jogo)
+                    if (newLeft === newRight) {
+                        score += 8;
+                    }
+
+                    // Prefere jogar carroças no início do jogo (estratégia avançada)
+                    if (tile.a === tile.b && chain.length < 3) {
+                        score += 6;
+                    }
+
+                    // Bônus para peças que "fecham" o jogo (usam todas as peças de um número)
+                    // Estima se todas as peças de algum número já foram jogadas
+                    const leftCount = getAvailableCount(newLeft, remainingHand, state.boneyard, nextChain);
+                    const rightCount = getAvailableCount(newRight, remainingHand, state.boneyard, nextChain);
+                    if (leftCount === 0 && newLeft === newRight) {
+                        score += 10; // Fechou completamente
+                    }
+                }
+
+                // Dificuldade Média: estratégia mais simples mas ainda inteligente
+                if (state.difficulty === 'medio') {
+                    // Versão simplificada: foca em segurança e flexibilidade básica
+                    if (newLeft === newRight) {
+                        score += 5;
+                    }
+                }
+
+                return score;
+            }
+
+            // Escolhe a melhor opção baseada na pontuação
+            return options.reduce((best, o) => {
+                return scoreOption(o) > scoreOption(best) ? o : best;
+            }, options[0]);
+        }
+
+        // ================================================================
+        // ===== PIP MAP =====
+        // ================================================================
+
+        const PIP_MAP = {
+            0: [],
+            1: [
+                [2, 2]
+            ],
+            2: [
+                [1, 1],
+                [3, 3]
+            ],
+            3: [
+                [1, 1],
+                [2, 2],
+                [3, 3]
+            ],
+            4: [
+                [1, 1],
+                [1, 3],
+                [3, 1],
+                [3, 3]
+            ],
+            5: [
+                [1, 1],
+                [1, 3],
+                [2, 2],
+                [3, 1],
+                [3, 3]
+            ],
+            6: [
+                [1, 1],
+                [1, 2],
+                [1, 3],
+                [3, 1],
+                [3, 2],
+                [3, 3]
+            ],
+        };
+
+        // ================================================================
+        // ===== RENDERIZAÇÃO =====
+        // ================================================================
+
+        function createDominoTileHTML(a, b, unit, orientation, faceDown, highlighted, selected, dimmed) {
+            unit = unit || 44;
+            orientation = orientation || 'vertical';
+            faceDown = faceDown || false;
+            highlighted = highlighted || false;
+            selected = selected || false;
+            dimmed = dimmed || false;
+
+            const w = orientation === 'vertical' ? unit : unit * 2;
+            const h = orientation === 'vertical' ? unit * 2 : unit;
+
+            let classes = 'domino-tile';
+            if (faceDown) classes += ' face-down';
+            if (highlighted) classes += ' highlighted';
+            if (selected) classes += ' selected';
+            if (dimmed) classes += ' dimmed';
+
+            let innerHTML = '';
+            if (faceDown) {
+                innerHTML =
+                    `<div class="face-down-inner"><div class="dot"></div></div>`;
+            } else {
+                const halfHTML = (value) => {
+                    const pips = PIP_MAP[value] || [];
+                    let pipsHTML = '';
+                    const size = Math.max(3, unit * 0.155);
+                    pips.forEach(([col, row]) => {
+                        pipsHTML +=
+                            `<div class="pip" style="grid-column:${col};grid-row:${row};width:${size}px;height:${size}px;"></div>`;
+                    });
+                    const pad = Math.max(2, unit * 0.14);
+                    return `<div class="domino-half" style="padding:${pad}px;">${pipsHTML}</div>`;
+                };
+                const dividerStyle = orientation === 'vertical' ?
+                    'margin:0 12%;height:2px;' :
+                    'margin:12% 0;width:2px;';
+                innerHTML = `
+              <div style="display:flex;flex-direction:${orientation === 'vertical' ? 'column' : 'row'};width:100%;height:100%;">
+                ${halfHTML(a)}
+                <div class="domino-divider" style="${dividerStyle}"></div>
+                ${halfHTML(b)}
+              </div>
+            `;
+            }
+
+            const radius = Math.max(5, unit * 0.16);
+            return `<div class="${classes}" style="width:${w}px;height:${h}px;border-radius:${radius}px;--unit:${unit}px;">${innerHTML}</div>`;
+        }
+
+        function createBoardHTML(chain, available, mode, hoverSide, emptyHint, unit, animatedIds) {
+            const empty = chain.length === 0;
+            const markEnds = chain.length >= 3;
+            animatedIds = animatedIds || new Set();
+
+            const dropZoneHTML = (side) => {
+                const enabled = mode !== 'none' && available[side];
+                if (!enabled) return '';
+                const clickable = mode === 'active';
+                const isHover = clickable && hoverSide === side;
+                let classes = 'drop-zone';
+                classes += clickable ? ' active' : ' hint';
+                if (isHover) classes += ' hover';
+                const style = `width:${empty ? unit * 3 : unit * 1.5}px;height:${unit * 2}px;`;
+                const label = empty ? 'Solte aqui' : side === 'left' ? '◀' : '▶';
+                const onclickAttr = clickable ? ` onclick="onDropZoneClick('${side}')"` : '';
+                return `<div class="${classes}" style="${style}" data-drop-side="${side}">${label}</div>`;
+            };
+
+            if (empty) {
+                if (mode !== 'none') {
+                    return dropZoneHTML('right');
+                }
+                return `<div class="drop-zone empty-hint">${emptyHint || 'Arraste sua primeira peça'}</div>`;
+            }
+
+            let tilesHTML = '';
+            chain.forEach((t, i) => {
+                const isEnd = markEnds && (i === 0 || i === chain.length - 1);
+                const tileHTML = createDominoTileHTML(t.a, t.b, unit, t.isDouble ? 'vertical' : 'horizontal',
+                    false, false, false, false);
+                const endLabel = isEnd ?
+                    `<span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--gold);color:oklch(0.24 0.04 60);border-radius:9999px;padding:0 6px;font-size:8px;font-weight:700;text-transform:uppercase;white-space:nowrap;">${i === 0 ? '◀ ponta' : 'ponta ▶'}</span>` :
+                    '';
+                const isNew = !animatedIds.has(t.id);
+                const wrapClass = isNew ? 'animate-tile-pop' : '';
+                tilesHTML +=
+                    `<div class="${wrapClass}" style="position:relative;">${tileHTML}${endLabel}</div>`;
+            });
+
+            return dropZoneHTML('left') + tilesHTML + dropZoneHTML('right');
+        }
+
+        // ================================================================
+        // ===== AVATAR FUNCTIONS =====
+        // ================================================================
+
+        function createPlayerAvatarHTML() {
+            const config = JSON.parse(localStorage.getItem('avatarConfig') || '{}');
+            const selected = [1, 2, 3].includes(Number(config.selected)) ?
+                Number(config.selected) :
+                3;
+
+            return `
+                <div class="player-avatar">
+                    <img src="avatar${selected}.png" alt="Seu avatar">
+                </div>
+            `;
+        }
+
+        function createAIAvatarHTML() {
+            return `
+                <div class="player-avatar ai-avatar">
+                    🤖
+                </div>
+            `;
+        }
+
+        // ================================================================
+        // ===== APP =====
+        // ================================================================
+
+        const DIFF_LABEL = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' };
+
+        const params = new URLSearchParams(window.location.search);
+        const difficulty = params.get('dif') || 'facil';
+        const validDifficulties = ['facil', 'medio', 'dificil'];
+        const finalDifficulty = validDifficulties.includes(difficulty) ? difficulty : 'facil';
+
+        let state = newRound(finalDifficulty);
+        let dragState = null;
+        let selectedTile = null;
+        let hoverSide = null;
+        let message = '';
+        let isDragging = false;
+        let startPos = { x: 0, y: 0 };
+        let pointerId = null;
+        let aiTimer = null;
+        let isRendering = false;
+
+        let animatedTileIds = new Set();
+        let lastBoardSize = { w: 0, h: 0 };
+        let boardResizeObserver = null;
+        let roDebounceTimer = null;
+        let lastBoardScrollTop = null;
+
+        const root = document.getElementById('root');
+
+        // ===== SONS =====
+        function playTileSound() {
+            try {
+                const ac = new(window.AudioContext || window.webkitAudioContext)();
+                if (ac.state === 'suspended') ac.resume();
+                const now = ac.currentTime;
+                const osc = ac.createOscillator();
+                const oscGain = ac.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(320, now);
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.09);
+                oscGain.gain.setValueAtTime(0.28, now);
+                oscGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.12);
+                osc.connect(oscGain).connect(ac.destination);
+                osc.start(now);
+                osc.stop(now + 0.14);
+
+                const len = Math.floor(ac.sampleRate * 0.05);
+                const buffer = ac.createBuffer(1, len, ac.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 3;
+                const noise = ac.createBufferSource();
+                noise.buffer = buffer;
+                const filter = ac.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 2400;
+                const noiseGain = ac.createGain();
+                noiseGain.gain.setValueAtTime(0.22, now);
+                noiseGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.06);
+                noise.connect(filter).connect(noiseGain).connect(ac.destination);
+                noise.start(now);
+                noise.stop(now + 0.06);
+            } catch (e) { /* silêncio */ }
+        }
+
+        // ===== CÁLCULO DE TAMANHOS =====
+        const BOARD_MIN_UNIT = 24;
+        const BOARD_MAX_UNIT = 64;
+
+        function calcBoardUnit(chainLen, containerWidth, containerHeight) {
+            if (!containerWidth) return 32;
+            const gap = 4;
+            const pad = 12;
+            const maxW = containerWidth - pad;
+            const maxH = containerHeight ? containerHeight - pad : Infinity;
+
+            for (let u = BOARD_MAX_UNIT; u >= BOARD_MIN_UNIT; u--) {
+                const tileW = 2 * u + gap;
+                const perRow = Math.max(1, Math.floor(maxW / tileW));
+                const rows = Math.ceil((chainLen + 2) / perRow);
+                const rowH = u * 2 + gap;
+                if (rows * rowH <= maxH) return u;
+            }
+            return BOARD_MIN_UNIT;
+        }
+
+        function calcHandUnit(handSize) {
+            if (handSize > 9) return 34;
+            if (handSize > 7) return 38;
+            return 44;
+        }
+
+        // ===== RENDER =====
+        function render() {
+            if (isRendering) return;
+            isRendering = true;
+
+            try {
+                const myTurn = state.turn === 'human' && state.status === 'playing';
+                const matchOver = state.status === 'round-over' &&
+                    (state.scores.human >= TARGET_SCORE || state.scores.ai >= TARGET_SCORE);
+
+                const playable = (t) => myTurn && (canPlay(t, state.chain).left || canPlay(t, state.chain).right);
+                const canDraw = myTurn && !hasAnyMove(state.hands.human, state.chain) && state.boneyard.length > 0;
+                const mustPass = myTurn && !hasAnyMove(state.hands.human, state.chain) && state.boneyard.length === 0;
+
+                const activeTile = dragState ? dragState.tile : selectedTile;
+                const specificAvailable = activeTile ? canPlay(activeTile, state.chain) : null;
+                const genericAvailable = myTurn ? handAvailability(state.hands.human, state.chain) : { left: false, right: false };
+                const available = specificAvailable || genericAvailable;
+
+                let mode = 'none';
+                if (myTurn && activeTile) {
+                    mode = 'active';
+                } else if (myTurn && (genericAvailable.left || genericAvailable.right)) {
+                    mode = 'hint';
+                }
+
+                const handUnit = calcHandUnit(state.hands.human.length);
+
+                const boardWrapperEl = document.querySelector('.board-wrapper');
+                if (boardWrapperEl) {
+                    lastBoardScrollTop = boardWrapperEl.scrollTop;
+                }
+                const boardWidth = boardWrapperEl ? boardWrapperEl.clientWidth : 400;
+                const boardHeight = boardWrapperEl ? boardWrapperEl.clientHeight : 300;
+                const boardUnit = calcBoardUnit(state.chain.length, boardWidth, boardHeight);
+
+                lastBoardSize = { w: boardWidth, h: boardHeight };
+
+                let statusText = '';
+                if (state.status === 'round-over') {
+                    if (state.winner === 'human') statusText = `Você venceu a rodada (+${state.roundPoints})`;
+                    else if (state.winner === 'ai') statusText = `Oponente venceu a rodada (+${state.roundPoints})`;
+                    else statusText = 'Rodada empatada';
+                } else {
+                    statusText = message || (myTurn ?
+                        'Sua vez — arraste uma peça destacada até o tabuleiro' :
+                        'Vez do oponente…');
+                }
+
+                // ---- DETECTA TURNO PARA DESTAQUE ----
+                const isHumanTurn = state.turn === 'human' && state.status === 'playing';
+                const isAITurn = state.turn === 'ai' && state.status === 'playing';
+
+                let html = `<div class="game-container">`;
+
+                // ===== HEADER COM BOTÃO VOLTAR ESTILO COMO JOGAR =====
+                html += `
+              <header class="game-header">
+              <a href="index.html" class="btn-icon" aria-label="Voltar ao Início">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                  </svg>
+                </a>
+                <div class="header-center">
+                  <div class="header-top-row">
+                    <span class="header-difficulty">${DIFF_LABEL[finalDifficulty]}</span>
+                    <span class="header-score-target">🏆 ${TARGET_SCORE} pts</span>
+                    <div class="header-divider-vertical"></div>
+                    <div class="header-players">
+                      <div class="header-player ${isHumanTurn ? 'active-turn' : ''}">
+                        ${createPlayerAvatarHTML()}
+                        <span class="player-name">Você</span>
+                        <span class="player-score">${state.scores.human}</span>
+                        <span class="player-score-label">pts</span>
+                      </div>
+                      <span class="header-vs">×</span>
+                      <div class="header-player ${isAITurn ? 'active-turn' : ''}">
+                        <span class="player-score">${state.scores.ai}</span>
+                        <span class="player-score-label">pts</span>
+                        <span class="player-name">Oponente</span>
+                        ${createAIAvatarHTML()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn-icon" onclick="restartMatch()" aria-label="Reiniciar">⟳</button>
+              </header>
+            `;
+
+                // ===== MÃO DO OPONENTE MELHORADA =====
+                html += `
+              <section class="opponent-hand">
+                <span class="opponent-label">🃏 mão</span>
+                ${state.hands.ai.map(() => `
+                  <span class="opponent-tile-wrapper">
+                    ${createDominoTileHTML(0, 0, 20, 'vertical', true)}
+                  </span>
+                `).join('')}
+                <span class="opponent-count">${state.hands.ai.length}</span>
+              </section>
+            `;
+
+                // TABULEIRO
+                html += `
+              <div class="board-wrapper">
+                <div class="board">
+                  ${createBoardHTML(state.chain, available, mode, hoverSide, 'Arraste sua primeira peça', boardUnit, animatedTileIds)}
+                </div>
+              </div>
+            `;
+
+                // STATUS BAR
+                html += `
+              <div class="status-bar">
+                <div class="status-text" role="status">${statusText}</div>
+                <div class="actions">
+                  <span class="boneyard-count">Monte: ${state.boneyard.length}</span>
+                  ${canDraw ? `<button class="btn btn-sm" onclick="drawTile()">➕ Comprar</button>` : ''}
+                  ${mustPass ? `<button class="btn btn-sm btn-secondary" onclick="passTurn()">Passar</button>` : ''}
+                </div>
+              </div>
+            `;
+
+                // MÃO DO JOGADOR
+                html += `
+              <section class="player-hand no-scrollbar">
+                <div class="hand-inner">
+                  ${state.hands.human.map((t) => {
+                    const ok = playable(t);
+                    const isDragging = dragState && dragState.tile.id === t.id;
+                    const isSelected = selectedTile && selectedTile.id === t.id;
+                    const clickable = ok && !isDragging;
+                    const dimmed = myTurn && !ok;
+                    const translateY = ok ? 'transform:translateY(-4px);' : '';
+                    return `
+                      <button 
+                        class="${clickable ? 'clickable' : ''}" 
+                        style="touch-action:none;border:none;background:transparent;padding:0;${translateY}"
+                        onpointerdown="onTilePointerDown(event, '${t.id}')"
+                        ${!myTurn ? 'disabled' : ''}
+                        aria-label="Peça ${t.a} e ${t.b}"
+                      >
+                        ${createDominoTileHTML(t.a, t.b, handUnit, 'vertical', false, ok, isSelected, dimmed)}
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+              </section>
+            `;
+
+                // PEÇA FLUTUANTE
+                if (dragState && dragState.moved) {
+                    html += `
+                <div class="floating-tile" style="left:${dragState.x}px;top:${dragState.y}px;">
+                  ${createDominoTileHTML(dragState.tile.a, dragState.tile.b, handUnit, 'vertical', false, false, true, false)}
+                </div>
+              `;
+                }
+
+                // MODAL
+                if (state.status === 'round-over') {
+                    const isMatchOver = matchOver;
+                    const title = isMatchOver ?
+                        (state.scores.human > state.scores.ai ? 'Você venceu a partida!' :
+                            'Oponente venceu a partida') :
+                        (state.winner === 'human' ? 'Rodada sua!' : state.winner === 'ai' ? 'Rodada do oponente' :
+                            'Empate');
+
+                    html += `
+                <div class="modal-overlay">
+                  <div class="modal">
+                    <div class="trophy">🏆</div>
+                    <h2>${title}</h2>
+                    <p>Placar: você ${state.scores.human} × ${state.scores.ai} oponente</p>
+                    <div class="actions">
+                      ${isMatchOver ? `<button class="btn" onclick="restartMatch()">Nova partida</button>` : `<button class="btn" onclick="nextRound()">Próxima rodada</button>`}
+                      <button class="btn btn-secondary" onclick="exitGame()">Menu principal</button>
+                    </div>
+                  </div>
+                </div>
+              `;
+                }
+
+                html += '</div>';
+                root.innerHTML = html;
+
+                const newBoardWrapperEl = document.querySelector('.board-wrapper');
+                if (newBoardWrapperEl && lastBoardScrollTop != null) {
+                    newBoardWrapperEl.scrollTop = lastBoardScrollTop;
+                }
+
+                state.chain.forEach((t) => animatedTileIds.add(t.id));
+                setupBoardResizeObserver();
+
+            } catch (e) {
+                console.error('Erro no render:', e);
+            }
+
+            isRendering = false;
+        }
+
+        function setupBoardResizeObserver() {
+            const wrapper = document.querySelector('.board-wrapper');
+            if (!wrapper || typeof ResizeObserver === 'undefined') return;
+
+            if (boardResizeObserver) {
+                boardResizeObserver.disconnect();
+            }
+
+            boardResizeObserver = new ResizeObserver((entries) => {
+                const entry = entries[0];
+                if (!entry) return;
+                const { width, height } = entry.contentRect;
+                const changed = Math.abs(width - lastBoardSize.w) > 1 || Math.abs(height - lastBoardSize.h) > 1;
+                if (!changed) return;
+
+                clearTimeout(roDebounceTimer);
+                roDebounceTimer = setTimeout(() => {
+                    if (state.status !== 'round-over' && !isRendering) render();
+                }, 80);
+            });
+
+            boardResizeObserver.observe(wrapper);
+        }
+
+        // ================================================================
+        // ===== EVENTOS =====
+        // ================================================================
+
+        function onTilePointerDown(e, tileId) {
+            const tile = state.hands.human.find(t => t.id === tileId);
+            if (!tile) return;
+            if (state.turn !== 'human' || state.status !== 'playing') return;
+            if (e.button !== undefined && e.button !== 0) return;
+
+            startPos = { x: e.clientX, y: e.clientY };
+            selectedTile = null;
+            isDragging = false;
+            pointerId = e.pointerId;
+
+            dragState = {
+                tile: tile,
+                x: e.clientX,
+                y: e.clientY,
+                moved: false,
+            };
+
+            render();
+
+            document.addEventListener('pointermove', onPointerMove);
+            document.addEventListener('pointerup', onPointerUp);
+            document.addEventListener('pointercancel', onPointerUp);
+        }
+
+        function updateFloatingTilePosition() {
+            if (!dragState) return;
+            const el = document.querySelector('.floating-tile');
+            if (el) {
+                el.style.left = dragState.x + 'px';
+                el.style.top = dragState.y + 'px';
+            }
+        }
+
+        function onPointerMove(e) {
+            if (!dragState) return;
+
+            const wasMoved = dragState.moved;
+            const moved = wasMoved || Math.hypot(e.clientX - startPos.x, e.clientY - startPos.y) > 8;
+
+            dragState.x = e.clientX;
+            dragState.y = e.clientY;
+            dragState.moved = moved;
+            isDragging = moved;
+
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            const zone = el ? el.closest('[data-drop-side]') : null;
+            const newHoverSide = zone ? zone.dataset.dropSide : null;
+            const hoverChanged = newHoverSide !== hoverSide;
+            hoverSide = newHoverSide;
+
+            if ((!wasMoved && moved) || hoverChanged) {
+                render();
+                return;
+            }
+
+            updateFloatingTilePosition();
+        }
+
+        function onPointerUp(e) {
+            if (!dragState) return;
+
+            const draggedTile = dragState.tile;
+            const wasDragging = isDragging;
+
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            const zone = el ? el.closest('[data-drop-side]') : null;
+            const side = zone ? zone.dataset.dropSide : null;
+
+            dragState = null;
+            hoverSide = null;
+            isDragging = false;
+
+            if (side && wasDragging) {
+                const c = canPlay(draggedTile, state.chain);
+                if (state.chain.length === 0) {
+                    playTile(draggedTile, 'right');
+                } else if (c[side]) {
+                    playTile(draggedTile, side);
+                } else {
+                    message = 'Essa peça não encaixa nessa ponta.';
+                    render();
+                }
+            } else if (!wasDragging) {
+                const c = canPlay(draggedTile, state.chain);
+                if (state.chain.length === 0) {
+                    playTile(draggedTile, 'right');
+                } else if (c.left && !c.right) {
+                    playTile(draggedTile, 'left');
+                } else if (c.right && !c.left) {
+                    playTile(draggedTile, 'right');
+                } else if (c.left && c.right) {
+                    selectedTile = draggedTile;
+                    message = 'Escolha a ponta do tabuleiro (◀ ou ▶).';
+                    render();
+                } else {
+                    message = 'Essa peça não encaixa. Compre ou tente outra.';
+                    render();
+                }
+            } else {
+                render();
+            }
+
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerUp);
+            document.removeEventListener('pointercancel', onPointerUp);
+        }
+
+        function onDropZoneClick(side) {
+            if (!selectedTile) return;
+            if (state.turn !== 'human' || state.status !== 'playing') return;
+            playTile(selectedTile, side);
+        }
+
+        // ================================================================
+        // ===== AÇÕES DO JOGO =====
+        // ================================================================
+
+        function playTile(tile, side) {
+            if (state.turn !== 'human' || state.status !== 'playing') return;
+            const c = canPlay(tile, state.chain);
+            const chosen = state.chain.length === 0 ? 'right' : c[side] ? side : c.left ? 'left' : 'right';
+            if (state.chain.length > 0 && !c[chosen]) {
+                message = 'Essa peça não encaixa.';
+                render();
+                return;
+            }
+
+            state = {
+                ...state,
+                chain: place(state.chain, tile, chosen),
+                hands: { ...state.hands, human: removeTile(state.hands.human, tile.id) },
+                turn: 'ai',
+            };
+            state = checkRoundEnd(state);
+            playTileSound();
+            selectedTile = null;
+            hoverSide = null;
+            message = '';
+            render();
+
+            if (state.status === 'playing' && state.turn === 'ai') {
+                clearTimeout(aiTimer);
+                aiTimer = setTimeout(() => aiTurn(), 700);
+            }
+        }
+
+        function drawTile() {
+            if (state.boneyard.length === 0 || state.turn !== 'human') return;
+            const [tile, ...rest] = state.boneyard;
+            state = {
+                ...state,
+                boneyard: rest,
+                hands: { ...state.hands, human: [...state.hands.human, tile] },
+                log: [...state.log, 'Você comprou uma peça.'],
+            };
+            message = '';
+            render();
+        }
+
+        function passTurn() {
+            if (state.turn === 'human') {
+                state = { ...state, turn: 'ai', log: [...state.log, 'Você passou a vez.'] };
+                render();
+                clearTimeout(aiTimer);
+                aiTimer = setTimeout(() => aiTurn(), 700);
+            }
+        }
+
+        function aiTurn() {
+            if (state.turn !== 'ai' || state.status !== 'playing') return;
+
+            let cur = { ...state };
+            while (!hasAnyMove(cur.hands.ai, cur.chain) && cur.boneyard.length > 0) {
+                const [tile, ...rest] = cur.boneyard;
+                cur = {
+                    ...cur,
+                    boneyard: rest,
+                    hands: { ...cur.hands, ai: [...cur.hands.ai, tile] },
+                    log: [...cur.log, 'Oponente comprou uma peça.'],
+                };
+            }
+
+            const move = aiChooseMove(cur);
+            if (!move) {
+                cur = checkRoundEnd({ ...cur, turn: 'human', log: [...cur.log, 'Oponente passou a vez.'] });
+                state = cur;
+                render();
+                return;
+            }
+
+            cur = {
+                ...cur,
+                chain: place(cur.chain, move.tile, move.side),
+                hands: { ...cur.hands, ai: removeTile(cur.hands.ai, move.tile.id) },
+                turn: 'human',
+            };
+            cur = checkRoundEnd(cur);
+            playTileSound();
+            state = cur;
+            render();
+        }
+
+        function nextRound() {
+            clearTimeout(aiTimer);
+            state = newRound(finalDifficulty, state.scores);
+            message = '';
+            selectedTile = null;
+            hoverSide = null;
+            dragState = null;
+            animatedTileIds = new Set();
+            lastBoardScrollTop = 0;
+            render();
+            if (state.turn === 'ai') {
+                aiTimer = setTimeout(() => aiTurn(), 500);
+            }
+        }
+
+        function restartMatch() {
+            clearTimeout(aiTimer);
+            state = newRound(finalDifficulty);
+            message = '';
+            selectedTile = null;
+            hoverSide = null;
+            dragState = null;
+            animatedTileIds = new Set();
+            lastBoardScrollTop = 0;
+            render();
+            if (state.turn === 'ai') {
+                aiTimer = setTimeout(() => aiTurn(), 500);
+            }
+        }
+
+        function exitGame() {
+            clearTimeout(aiTimer);
+            window.location.href = 'jogo.html';
+        }
+
+        // ===== EXPOR FUNÇÕES =====
+        window.onTilePointerDown = onTilePointerDown;
+        window.onDropZoneClick = onDropZoneClick;
+        window.drawTile = drawTile;
+        window.passTurn = passTurn;
+        window.nextRound = nextRound;
+        window.restartMatch = restartMatch;
+        window.exitGame = exitGame;
+
+        // ================================================================
+        // ===== INICIALIZAÇÃO =====
+        // ================================================================
+
+        let resizeTimeout;
+
+        function handleResize() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (state.status !== 'round-over') {
+                    render();
+                }
+            }, 200);
+        }
+
+        window.addEventListener('resize', handleResize);
+        window.addEventListener('orientationchange', handleResize);
+
+        render();
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if (state.status !== 'round-over') render();
+            });
+        });
+
+        if (state.turn === 'ai') {
+            aiTimer = setTimeout(() => aiTurn(), 500);
+        }
+
+        document.addEventListener('touchmove', (e) => {
+            if (dragState) e.preventDefault();
+        }, { passive: false });
+
+        console.log('🎲 Dominó carregado! Dificuldade:', finalDifficulty);
+        console.log('Estado inicial:', state);
+    </script>
+
+</body>
+</html>
