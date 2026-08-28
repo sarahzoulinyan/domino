@@ -402,7 +402,6 @@
             white-space: nowrap;
         }
 
-        /* ===== PERSONAGEM - ESTILO PRINCIPAL (TELAS GRANDES) ===== */
         .character-container {
             position: absolute;
             z-index: 2;
@@ -412,13 +411,13 @@
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            height: auto;
+            height: 85vh;
         }
 
         .character-container img {
             height: 85vh;
             width: auto;
-            max-width: none;
+            max-width: 100%;
             object-fit: contain;
             filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 15px rgba(29, 97, 48, 0.6));
         }
@@ -609,7 +608,7 @@
         }
 
         /* ============================================================
-           📱 RESPONSIVIDADE - CORREÇÃO DO PERSONAGEM
+           📱 RESPONSIVIDADE
            ============================================================ */
 
         @media (max-width: 1025px) {
@@ -689,14 +688,13 @@
                 flex: 1 1 130px;
             }
 
-            /* ===== CORREÇÃO: PERSONAGEM COM ALTURA FIXA ===== */
             .character-container {
                 z-index: 3;
                 bottom: -5px;
                 left: 50%;
                 transform: translateX(-50%);
                 width: 100%;
-                height: auto;
+                height: 68dvh;
                 display: flex;
                 justify-content: center;
                 align-items: flex-end;
@@ -704,8 +702,8 @@
 
             .character-container img {
                 width: auto;
-                height: 650px;
-                max-width: none;
+                height: 68dvh;
+                max-width: 100%;
                 object-fit: contain;
                 filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 12px rgba(29, 97, 48, 0.6));
             }
@@ -793,15 +791,14 @@
                 letter-spacing: 0.8px;
             }
 
-            /* ===== CORREÇÃO: PERSONAGEM EM TELAS PEQUENAS ===== */
             .character-container {
-                bottom: -5px;
-                height: auto;
+                height: 65dvh;
+                bottom: 0;
             }
 
             .character-container img {
-                height: 600px;
-                max-width: none;
+                height: 65dvh;
+                max-width: 115%;
             }
 
             .modal-content {
@@ -830,14 +827,6 @@
             }
         }
 
-        /* ===== TELAS MUITO PEQUENAS ===== */
-        @media (max-width: 380px) {
-            .character-container img {
-                height: 570px;
-                max-width: none;
-            }
-        }
-
         @media (max-width: 480px) and (max-height: 700px) {
             .background-title {
                 top: 22%;
@@ -858,15 +847,12 @@
                 flex: 1 1 90px;
             }
 
-            /* ===== CORREÇÃO: PERSONAGEM EM TELAS BAIXAS ===== */
             .character-container {
-                bottom: -20px;
-                height: auto;
+                height: 63dvh;
             }
 
             .character-container img {
-                height: 470px;
-                max-width: none;
+                height: 63dvh;
             }
 
             .modal-content {
@@ -891,7 +877,7 @@
             }
 
             .character-container img {
-                height: 650px;
+                height: 75vh;
             }
 
             .center-buttons {
