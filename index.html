@@ -387,13 +387,14 @@
             background: rgba(20, 40, 25, 0.8);
         }
 
+        /* ===== TÍTULO ATRÁS DO PERSONAGEM ===== */
         .background-title {
             position: absolute;
             font-size: 15vw;
             font-weight: 800;
             color: rgba(255, 255, 255, 0.92);
             letter-spacing: 5px;
-            z-index: 4;
+            z-index: 2; /* ATRÁS DO PERSONAGEM */
             text-transform: uppercase;
             user-select: none;
             text-shadow: 0px 5px 20px rgba(0, 0, 0, 0.5);
@@ -403,10 +404,11 @@
             white-space: nowrap;
         }
 
+        /* ===== PERSONAGEM NA FRENTE DO TÍTULO ===== */
         .character-container {
             position: absolute;
-            z-index: 3;
-            bottom: -50px;
+            z-index: 3; /* NA FRENTE DO TÍTULO */
+            bottom: 0;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -694,7 +696,7 @@
                 position: absolute;
                 z-index: 3;
                 left: 50%;
-                bottom: 2dvh;
+                bottom: 0;
                 transform: translateX(-50%);
                 width: 100%;
                 height: 76dvh;
@@ -797,7 +799,7 @@
 
             .character-container {
                 height: 74dvh;
-                bottom: 2dvh;
+                bottom: 0;
             }
 
             .character-container img {
@@ -853,7 +855,7 @@
 
             .character-container {
                 height: 70dvh;
-                bottom: 2dvh;
+                bottom: 0;
             }
 
             .character-container img {
