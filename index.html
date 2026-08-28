@@ -2,14 +2,36 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Dominó - Meu Jogo</title>
+    
+    <!-- ===== CORREÇÃO DO ZOOM NO SAFARI (iOS) ===== -->
+    <script>
+        // Corrige o bug de zoom do Safari (iOS) ao voltar para a página via bfcache
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted) {
+                var viewport = document.querySelector('meta[name="viewport"]');
+                if (viewport) {
+                    // força o Safari a reaplicar o viewport do zero
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+                }
+                window.scrollTo(0, 0);
+            }
+        });
+    </script>
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* ===== CORREÇÃO DE ZOOM E TOQUE ===== */
+        html {
+            touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
         }
 
         body {
@@ -19,6 +41,7 @@
             height: 100vh;
             width: 100vw;
             position: relative;
+            touch-action: manipulation;
         }
 
         /* --- Menu Superior --- */
@@ -113,7 +136,6 @@
             line-height: 1.2;
         }
 
-        /* ===== CORREÇÃO: NOME JUNTO ===== */
         .logo-card-title {
             display: flex;
             align-items: center;
@@ -163,8 +185,6 @@
             transform: translateX(3px);
             color: rgba(255, 255, 255, 0.7);
         }
-
-        /* ============================================================ */
 
         nav {
             display: flex;
@@ -233,8 +253,6 @@
         .audio-button.playing svg {
             fill: #f7d44a;
         }
-
-        /* --- FIM ESTILOS ÁUDIO --- */
 
         .nav-avatar {
             width: 38px;
@@ -897,13 +915,11 @@
 
     <!-- Menu Superior -->
     <header>
-        <!-- ===== NOVO LOGO COM WRAPPER ===== -->
         <div class="logo-wrapper" id="logoWrapper">
             <div class="logo" id="logoButton">
                 <img src="marcadaagua.png" alt="Marca d'água">
             </div>
             
-            <!-- Card flutuante -->
             <div class="logo-card" id="logoCard">
                 <div class="logo-card-content">
                     <div class="logo-card-title">
@@ -916,7 +932,6 @@
         </div>
 
         <nav id="mainNav">
-            <!-- Botão de áudio (substituído) -->
             <button class="nav-icon audio-button" id="audioButton" aria-label="Ativar música" type="button">
                 <svg id="audioIcon" viewBox="0 0 24 24">
                     <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.99 7.86-7 8.77v-2.06c2.89-.86 5-3.54-5-6.71s2.11-5.85 5-6.71z"/>
@@ -929,7 +944,6 @@
                 </svg>
             </a>
 
-            <!-- Avatar -->
             <div class="nav-avatar" id="navAvatar" onclick="openModal()">
                 <img src="avatar3.png" alt="Avatar" id="avatarImage">
             </div>
@@ -956,14 +970,12 @@
         <div class="modal-content">
             <h2 class="modal-title">Escolha seu Avatar</h2>
 
-            <!-- Preview -->
             <div class="avatar-preview">
                 <div class="nav-avatar" id="modalPreview">
                     <img src="avatar3.png" alt="Avatar" id="modalAvatarImage">
                 </div>
             </div>
 
-            <!-- Opções de Avatar -->
             <div class="avatar-options-label">Selecione um avatar</div>
             <div class="avatar-options" id="avatarOptions">
                 <div class="avatar-option" data-avatar="1" onclick="selectAvatar(1, this)">
@@ -980,7 +992,6 @@
                 </div>
             </div>
 
-            <!-- Botões -->
             <div class="modal-buttons">
                 <button class="btn-close-modal" onclick="closeModal()">Cancelar</button>
                 <button class="btn-save" onclick="saveAvatar()">Salvar</button>
@@ -991,6 +1002,18 @@
     </div>
 
     <script>
+        // ============================================================
+        // CORREÇÃO ADICIONAL: Reset do viewport em orientação change
+        // ============================================================
+        window.addEventListener('orientationchange', function() {
+            var viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                setTimeout(function() {
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+                }, 100);
+            }
+        });
+
         // ============================================================
         // NOVO: LÓGICA DO LOGO + CARD FLUTUANTE
         // ============================================================
@@ -1005,20 +1028,17 @@
             let clickTimer = null;
             let isMobile = window.innerWidth <= 1025;
 
-            // ===== DETECTA MOBILE =====
             function checkMobile() {
                 isMobile = window.innerWidth <= 1025 || 'ontouchstart' in window;
             }
             checkMobile();
             window.addEventListener('resize', checkMobile);
 
-            // ===== FUNÇÃO PARA ABRIR O CARD =====
             function openCard() {
                 logoCard.classList.add('active');
                 isCardOpen = true;
             }
 
-            // ===== FUNÇÃO PARA FECHAR O CARD =====
             function closeCard() {
                 logoCard.classList.remove('active');
                 isCardOpen = false;
@@ -1029,24 +1049,19 @@
                 }
             }
 
-            // ===== FUNÇÃO PARA ABRIR O SITE =====
             function openSite(e) {
                 e.stopPropagation();
                 window.open(SITE_URL, '_blank');
                 closeCard();
             }
 
-            // ===== CLICK NO LOGO (DESKTOP) =====
             function handleLogoClickDesktop(e) {
                 e.stopPropagation();
                 
                 if (isCardOpen) {
-                    // Card está aberto → navega
                     openSite(e);
                 } else {
-                    // Card fechado → abre
                     openCard();
-                    // Fecha automaticamente após 4 segundos se não interagir
                     if (clickTimer) clearTimeout(clickTimer);
                     clickTimer = setTimeout(() => {
                         closeCard();
@@ -1054,17 +1069,13 @@
                 }
             }
 
-            // ===== CLICK NO LOGO (MOBILE) =====
             function handleLogoClickMobile(e) {
                 e.stopPropagation();
                 
                 if (isCardOpen) {
-                    // Card está aberto → navega
                     openSite(e);
                 } else {
-                    // Primeiro toque → abre o card
                     openCard();
-                    // Fecha automaticamente após 4 segundos
                     if (clickTimer) clearTimeout(clickTimer);
                     clickTimer = setTimeout(() => {
                         closeCard();
@@ -1072,20 +1083,17 @@
                 }
             }
 
-            // ===== CLICK NO CARD =====
             function handleCardClick(e) {
                 e.stopPropagation();
                 openSite(e);
             }
 
-            // ===== CLICK FORA =====
             function handleOutsideClick(e) {
                 if (isCardOpen && !logoWrapper.contains(e.target)) {
                     closeCard();
                 }
             }
 
-            // ===== HOVER (DESKTOP) =====
             function handleMouseEnter() {
                 if (!isMobile && !isCardOpen) {
                     openCard();
@@ -1113,7 +1121,6 @@
                 }
             }
 
-            // ===== REGISTRA OS EVENTOS =====
             function setupEvents() {
                 logoButton.removeEventListener('click', handleLogoClickDesktop);
                 logoButton.removeEventListener('click', handleLogoClickMobile);
@@ -1134,7 +1141,6 @@
                 document.addEventListener('click', handleOutsideClick);
             }
 
-            // ===== REINICIA EVENTOS AO REDIMENSIONAR =====
             let resizeTimeout;
             window.addEventListener('resize', function() {
                 clearTimeout(resizeTimeout);
@@ -1145,7 +1151,6 @@
                 }, 250);
             });
 
-            // ===== INICIALIZA =====
             setupEvents();
 
             logoCard.addEventListener('click', function(e) {
@@ -1171,7 +1176,6 @@
         const audioButton = document.getElementById('audioButton');
         const audioIcon = document.getElementById('audioIcon');
 
-        // Volume baixo para não incomodar
         backgroundMusic.volume = 0.15;
 
         let musicEnabled = localStorage.getItem('musicEnabled');
@@ -1180,7 +1184,6 @@
             musicEnabled = 'true';
         }
 
-        // Atualiza visual do botão
         function updateAudioButton() {
             if (!backgroundMusic.paused) {
                 audioButton.classList.add('playing');
@@ -1193,7 +1196,6 @@
             }
         }
 
-        // Tenta iniciar a música
         function startMusic() {
             if (musicEnabled !== 'true') return;
 
@@ -1201,13 +1203,9 @@
                 .then(() => {
                     updateAudioButton();
                 })
-                .catch(() => {
-                    // O navegador bloqueou o autoplay.
-                    // A música será iniciada no primeiro clique do usuário.
-                });
+                .catch(() => {});
         }
 
-        // Primeiro clique/toque na página
         function startMusicAfterInteraction() {
             if (musicEnabled === 'true' && backgroundMusic.paused) {
                 startMusic();
@@ -1220,7 +1218,6 @@
         document.addEventListener('click', startMusicAfterInteraction);
         document.addEventListener('touchstart', startMusicAfterInteraction);
 
-        // Botão de áudio
         audioButton.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -1247,14 +1244,11 @@
             }
         });
 
-        // Inicializa
         updateAudioButton();
-
-        // Tenta tocar assim que possível
         startMusic();
 
         // ============================================================
-        // CONFIGURAÇÕES DO AVATAR (mantido igual)
+        // CONFIGURAÇÕES DO AVATAR
         // ============================================================
         let avatarConfig = {
             selected: 3
@@ -1366,7 +1360,6 @@
             closeModal();
         }
 
-        // ===== INICIALIZAÇÃO =====
         loadAvatarConfig();
     </script>
 
