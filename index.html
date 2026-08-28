@@ -849,7 +849,7 @@
 
             .character-container {
                 height: 63dvh;
-                      bottom: -20px; /* DESCE 20px */
+                bottom: -20px;
             }
 
             .character-container img {
@@ -903,6 +903,50 @@
             .center-buttons button {
                 font-size: 1.2rem;
                 padding: 18px 36px;
+            }
+        }
+
+        /* ============================================================
+           🍎 CORREÇÃO ESPECÍFICA PARA SAFARI / iOS
+           Mantém o personagem inteiro visível
+           ============================================================ */
+
+        @supports (-webkit-touch-callout: none) {
+
+            body {
+                height: -webkit-fill-available;
+                min-height: -webkit-fill-available;
+            }
+
+            main {
+                height: -webkit-fill-available;
+                min-height: -webkit-fill-available;
+            }
+
+            .character-container {
+                height: 61vh;
+                bottom: 0;
+            }
+
+            .character-container img {
+                height: 61vh;
+                max-height: 61vh;
+            }
+        }
+
+        /* iPhones menores - CORREÇÃO ESPECÍFICA */
+        @supports (-webkit-touch-callout: none) {
+            @media (max-width: 480px) and (max-height: 700px) {
+
+                .character-container {
+                    height: 61vh;
+                    bottom: 0;
+                }
+
+                .character-container img {
+                    height: 61vh;
+                    max-height: 61vh;
+                }
             }
         }
     </style>
