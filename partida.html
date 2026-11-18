@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dominó - Partida</title>
+    <title>Domino - Match</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Bungee&display=swap');
 
@@ -1026,8 +1026,8 @@
                 scores,
                 log: [
                     starter.player === 'human' ?
-                    'Você começa com a maior peça.' :
-                    'O oponente começa com a maior peça.',
+                    'You start with the highest tile.' :
+                    'The opponent starts with the highest tile.',
                 ],
             };
         }
@@ -1049,8 +1049,8 @@
                     log: [
                         ...state.log,
                         winner === 'human' ?
-                        `Você bateu! +${pts} pontos.` :
-                        `Oponente bateu! +${pts} para ele.`,
+                        `You went out! +${pts} points.` :
+                        `The opponent went out! +${pts} for the opponent.`,
                     ],
                 };
             }
@@ -1064,7 +1064,7 @@
                 const a = pipSum(state.hands.ai);
                 if (h === a) {
                     return { ...state, status: 'round-over', winner: 'draw', roundPoints: 0, log: [...state.log,
-                            'Jogo fechado: empate.'
+                            'Blocked game: draw.'
                         ] };
                 }
                 const winner = h < a ? 'human' : 'ai';
@@ -1077,7 +1077,7 @@
                     scores: { ...state.scores, [winner]: state.scores[winner] + pts },
                     log: [
                         ...state.log,
-                        `Jogo fechado! ${winner === 'human' ? 'Você venceu' : 'Oponente venceu'} por menos pontos (+${pts}).`,
+                        `Blocked game! ${winner === 'human' ? 'You won' : 'Opponent won'} with fewer points (+${pts}).`,
                     ],
                 };
             }
@@ -1110,8 +1110,8 @@
 
             // ===== MÉDIO E DIFÍCIL: HEURÍSTICA INTELIGENTE (SEM TRAPAÇA) =====
 
-            // 1. Conta quantas peças de cada número existem no jogo (incluindo mãos e monte)
-            // INFORMAÇÃO DISPONÍVEL PARA A IA: sua própria mão, o monte, e as peças já jogadas
+            // 1. Conta quantas peças de cada número existem no jogo (incluindo mãos and monte)
+            // INFORMAÇÃO DISPONÍVEL PARA A IA: sua própria mão, o monte, and as peças já jogadas
             function countAvailableNumbers(aiHand, boneyard, chain) {
                 const counts = [0, 0, 0, 0, 0, 0, 0];
 
@@ -1148,7 +1148,7 @@
             function safetyScore(number, aiHand, boneyard, chain) {
                 const available = getAvailableCount(number, aiHand, boneyard, chain);
                 // Quanto menos peças desse número disponíveis, mais seguro
-                // (menos chance do oponente ter e jogar nessa ponta)
+                // (menos chance do opponent ter and jogar nessa ponta)
                 const maxPossible = 8; // máximo de ocorrências de um número (0-6 com duplas)
                 // Inverte: se tem poucas peças, a ponta é mais segura
                 return Math.max(1, Math.min(10, 10 - (available / maxPossible) * 10));
@@ -1168,7 +1168,7 @@
                 return canPlayLeft + canPlayRight;
             }
 
-            // 5. ESTIMA a probabilidade do oponente ter peças de um número
+            // 5. ESTIMA a probabilidade do opponent ter peças de um número
             // (sem olhar a mão dele - usa apenas informação pública)
             // VERSÃO APRIMORADA: usa contagem real de ocorrências
             function estimateOpponentChance(number, aiHand, boneyard, chain) {
@@ -1176,7 +1176,7 @@
                 const totalOccurrences = 8; // Cada número aparece 8 vezes no dominó duplo-6
                 const unknownOccurrences = totalOccurrences - visible;
 
-                // Quanto mais ocorrências desconhecidas, maior a chance do oponente ter
+                // Quanto mais ocorrências desconhecidas, maior a chance do opponent ter
                 // Retorna um valor que representa o "perigo" de deixar esse número aberto
                 return unknownOccurrences;
             }
@@ -1214,11 +1214,11 @@
 
                 // BÔNUS EXTRA PARA DIFÍCIL: estimativa avançada
                 if (state.difficulty === 'dificil') {
-                    // Estima quantas peças do número o oponente pode ter
+                    // Estima quantas peças do número o opponent pode ter
                     const opponentLeft = estimateOpponentChance(newLeft, remainingHand, state.boneyard, nextChain);
                     const opponentRight = estimateOpponentChance(newRight, remainingHand, state.boneyard, nextChain);
 
-                    // Quanto MENOS o oponente puder jogar na ponta, MELHOR
+                    // Quanto MENOS o opponent puder jogar na ponta, MELHOR
                     // Usa a estimativa de ocorrências desconhecidas
                     score -= (opponentLeft + opponentRight) * 0.6;
 
@@ -1243,7 +1243,7 @@
 
                 // Dificuldade Média: estratégia mais simples mas ainda inteligente
                 if (state.difficulty === 'medio') {
-                    // Versão simplificada: foca em segurança e flexibilidade básica
+                    // Versão simplificada: foca em segurança and flexibilidade básica
                     if (newLeft === newRight) {
                         score += 5;
                     }
@@ -1375,7 +1375,7 @@
                 if (mode !== 'none') {
                     return dropZoneHTML('right');
                 }
-                return `<div class="drop-zone empty-hint">${emptyHint || 'Arraste sua primeira peça'}</div>`;
+                return `<div class="drop-zone empty-hint">${emptyHint || 'Drag your first tile'}</div>`;
             }
 
             let tilesHTML = '';
@@ -1424,7 +1424,7 @@
         // ===== APP =====
         // ================================================================
 
-        const DIFF_LABEL = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' };
+        const DIFF_LABEL = { facil: 'Easy', medio: 'Medium', dificil: 'Hard' };
 
         const params = new URLSearchParams(window.location.search);
         const difficulty = params.get('dif') || 'facil';
@@ -1552,13 +1552,13 @@
 
                 let statusText = '';
                 if (state.status === 'round-over') {
-                    if (state.winner === 'human') statusText = `Você venceu a rodada (+${state.roundPoints})`;
-                    else if (state.winner === 'ai') statusText = `Oponente venceu a rodada (+${state.roundPoints})`;
-                    else statusText = 'Rodada empatada';
+                    if (state.winner === 'human') statusText = `You won a rodada (+${state.roundPoints})`;
+                    else if (state.winner === 'ai') statusText = `Opponent won a rodada (+${state.roundPoints})`;
+                    else statusText = 'Round drawn';
                 } else {
                     statusText = message || (myTurn ?
-                        'Sua vez — arraste uma peça destacada até o tabuleiro' :
-                        'Vez do oponente…');
+                        'Your turn — drag a highlighted tile onto the board' :
+                        'Opponent's turn…');
                 }
 
                 // ---- DETECTA TURNO PARA DESTAQUE ----
@@ -1570,7 +1570,7 @@
                 // ===== HEADER COM BOTÃO VOLTAR ESTILO COMO JOGAR =====
                 html += `
               <header class="game-header">
-              <a href="index.html" class="btn-icon" aria-label="Voltar ao Início">
+              <a href="index.html" class="btn-icon" aria-label="Back to Home">
                   <svg viewBox="0 0 24 24">
                     <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
                   </svg>
@@ -1583,7 +1583,7 @@
                     <div class="header-players">
                       <div class="header-player ${isHumanTurn ? 'active-turn' : ''}">
                         ${createPlayerAvatarHTML()}
-                        <span class="player-name">Você</span>
+                        <span class="player-name">You</span>
                         <span class="player-score">${state.scores.human}</span>
                         <span class="player-score-label">pts</span>
                       </div>
@@ -1591,20 +1591,20 @@
                       <div class="header-player ${isAITurn ? 'active-turn' : ''}">
                         <span class="player-score">${state.scores.ai}</span>
                         <span class="player-score-label">pts</span>
-                        <span class="player-name">Oponente</span>
+                        <span class="player-name">Opponent</span>
                         ${createAIAvatarHTML()}
                       </div>
                     </div>
                   </div>
                 </div>
-                <button class="btn-icon" onclick="restartMatch()" aria-label="Reiniciar">⟳</button>
+                <button class="btn-icon" onclick="restartMatch()" aria-label="Restart">⟳</button>
               </header>
             `;
 
                 // ===== MÃO DO OPONENTE MELHORADA =====
                 html += `
               <section class="opponent-hand">
-                <span class="opponent-label">🃏 mão</span>
+                <span class="opponent-label">🃏 hand</span>
                 ${state.hands.ai.map(() => `
                   <span class="opponent-tile-wrapper">
                     ${createDominoTileHTML(0, 0, 20, 'vertical', true)}
@@ -1618,7 +1618,7 @@
                 html += `
               <div class="board-wrapper">
                 <div class="board">
-                  ${createBoardHTML(state.chain, available, mode, hoverSide, 'Arraste sua primeira peça', boardUnit, animatedTileIds)}
+                  ${createBoardHTML(state.chain, available, mode, hoverSide, 'Drag your first tile', boardUnit, animatedTileIds)}
                 </div>
               </div>
             `;
@@ -1628,9 +1628,9 @@
               <div class="status-bar">
                 <div class="status-text" role="status">${statusText}</div>
                 <div class="actions">
-                  <span class="boneyard-count">Monte: ${state.boneyard.length}</span>
-                  ${canDraw ? `<button class="btn btn-sm" onclick="drawTile()">➕ Comprar</button>` : ''}
-                  ${mustPass ? `<button class="btn btn-sm btn-secondary" onclick="passTurn()">Passar</button>` : ''}
+                  <span class="boneyard-count">Boneyard: ${state.boneyard.length}</span>
+                  ${canDraw ? `<button class="btn btn-sm" onclick="drawTile()">➕ Draw</button>` : ''}
+                  ${mustPass ? `<button class="btn btn-sm btn-secondary" onclick="passTurn()">Pass</button>` : ''}
                 </div>
               </div>
             `;
@@ -1652,7 +1652,7 @@
                         style="touch-action:none;border:none;background:transparent;padding:0;${translateY}"
                         onpointerdown="onTilePointerDown(event, '${t.id}')"
                         ${!myTurn ? 'disabled' : ''}
-                        aria-label="Peça ${t.a} e ${t.b}"
+                        aria-label="Tile ${t.a} and ${t.b}"
                       >
                         ${createDominoTileHTML(t.a, t.b, handUnit, 'vertical', false, ok, isSelected, dimmed)}
                       </button>
@@ -1675,20 +1675,20 @@
                 if (state.status === 'round-over') {
                     const isMatchOver = matchOver;
                     const title = isMatchOver ?
-                        (state.scores.human > state.scores.ai ? 'Você venceu a partida!' :
-                            'Oponente venceu a partida') :
-                        (state.winner === 'human' ? 'Rodada sua!' : state.winner === 'ai' ? 'Rodada do oponente' :
-                            'Empate');
+                        (state.scores.human > state.scores.ai ? 'You won a partida!' :
+                            'Opponent won a partida') :
+                        (state.winner === 'human' ? 'You won the round!' : state.winner === 'ai' ? 'Opponent won the round' :
+                            'Draw');
 
                     html += `
                 <div class="modal-overlay">
                   <div class="modal">
                     <div class="trophy">🏆</div>
                     <h2>${title}</h2>
-                    <p>Placar: você ${state.scores.human} × ${state.scores.ai} oponente</p>
+                    <p>Score: you ${state.scores.human} × ${state.scores.ai} opponent</p>
                     <div class="actions">
-                      ${isMatchOver ? `<button class="btn" onclick="restartMatch()">Nova partida</button>` : `<button class="btn" onclick="nextRound()">Próxima rodada</button>`}
-                      <button class="btn btn-secondary" onclick="exitGame()">Menu principal</button>
+                      ${isMatchOver ? `<button class="btn" onclick="restartMatch()">New match</button>` : `<button class="btn" onclick="nextRound()">Next round</button>`}
+                      <button class="btn btn-secondary" onclick="exitGame()">Main menu</button>
                     </div>
                   </div>
                 </div>
@@ -1707,7 +1707,7 @@
                 setupBoardResizeObserver();
 
             } catch (e) {
-                console.error('Erro no render:', e);
+                console.error('Render error:', e);
             }
 
             isRendering = false;
@@ -1821,7 +1821,7 @@
                 } else if (c[side]) {
                     playTile(draggedTile, side);
                 } else {
-                    message = 'Essa peça não encaixa nessa ponta.';
+                    message = 'This tile does not fit on that end.';
                     render();
                 }
             } else if (!wasDragging) {
@@ -1834,10 +1834,10 @@
                     playTile(draggedTile, 'right');
                 } else if (c.left && c.right) {
                     selectedTile = draggedTile;
-                    message = 'Escolha a ponta do tabuleiro (◀ ou ▶).';
+                    message = 'Choose an end of the board (◀ or ▶).';
                     render();
                 } else {
-                    message = 'Essa peça não encaixa. Compre ou tente outra.';
+                    message = 'This tile does not fit. Draw or try another one.';
                     render();
                 }
             } else {
@@ -1864,7 +1864,7 @@
             const c = canPlay(tile, state.chain);
             const chosen = state.chain.length === 0 ? 'right' : c[side] ? side : c.left ? 'left' : 'right';
             if (state.chain.length > 0 && !c[chosen]) {
-                message = 'Essa peça não encaixa.';
+                message = 'This tile does not fit.';
                 render();
                 return;
             }
@@ -1895,7 +1895,7 @@
                 ...state,
                 boneyard: rest,
                 hands: { ...state.hands, human: [...state.hands.human, tile] },
-                log: [...state.log, 'Você comprou uma peça.'],
+                log: [...state.log, 'You drew a tile.'],
             };
             message = '';
             render();
@@ -1903,7 +1903,7 @@
 
         function passTurn() {
             if (state.turn === 'human') {
-                state = { ...state, turn: 'ai', log: [...state.log, 'Você passou a vez.'] };
+                state = { ...state, turn: 'ai', log: [...state.log, 'You passed your turn.'] };
                 render();
                 clearTimeout(aiTimer);
                 aiTimer = setTimeout(() => aiTurn(), 700);
@@ -1920,13 +1920,13 @@
                     ...cur,
                     boneyard: rest,
                     hands: { ...cur.hands, ai: [...cur.hands.ai, tile] },
-                    log: [...cur.log, 'Oponente comprou uma peça.'],
+                    log: [...cur.log, 'The opponent drew a tile.'],
                 };
             }
 
             const move = aiChooseMove(cur);
             if (!move) {
-                cur = checkRoundEnd({ ...cur, turn: 'human', log: [...cur.log, 'Oponente passou a vez.'] });
+                cur = checkRoundEnd({ ...cur, turn: 'human', log: [...cur.log, 'The opponent passed.'] });
                 state = cur;
                 render();
                 return;
@@ -2022,7 +2022,7 @@
             if (dragState) e.preventDefault();
         }, { passive: false });
 
-        console.log('🎲 Dominó carregado! Dificuldade:', finalDifficulty);
+        console.log('🎲 Domino carregado! Dificuldade:', finalDifficulty);
         console.log('Estado inicial:', state);
     </script>
 
