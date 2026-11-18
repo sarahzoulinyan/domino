@@ -1426,7 +1426,7 @@
 
         const DIFF_LABEL = { facil: 'Easy', medio: 'Medium', dificil: 'Hard' };
 
-        const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(window.location.search.split('?').at(-1));
         const difficulty = params.get('dif') || 'facil';
         const validDifficulties = ['facil', 'medio', 'dificil'];
         const finalDifficulty = validDifficulties.includes(difficulty) ? difficulty : 'facil';
@@ -1976,7 +1976,7 @@
 
         function exitGame() {
             clearTimeout(aiTimer);
-            window.location.href = 'jogo.html';
+            window.location.href = location.hostname === 'htmlpreview.github.io' ? 'https://htmlpreview.github.io/?https://github.com/sarahzoulinyan/domino/blob/main/jogo.html' : 'jogo.html';
         }
 
         // ===== EXPOR FUNÇÕES =====
