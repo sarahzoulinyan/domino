@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dominó - Escolha a Dificuldade</title>
+    <title>Domino - Choose a Difficulty</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;400;600;700;800&display=swap');
 
@@ -14,7 +14,7 @@
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* ===== BARRA DE ROLAGEM PERSONALIZADA - TEMA DOMINÓ ===== */
+        /* ===== BARRA DE ROLAGEM PERSONALIZADA - TEMA DOMINO ===== */
         ::-webkit-scrollbar {
             width: 10px;
             background: #0d2e15;
@@ -389,7 +389,7 @@
     </div>
 
     <header class="game-header">
-        <a href="index.html" class="back-icon-btn" aria-label="Voltar ao Início">
+        <a href="index.html" class="back-icon-btn" aria-label="Back to Home">
             <svg viewBox="0 0 24 24">
                 <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
             </svg>
@@ -398,9 +398,9 @@
 
     <div class="difficulty-container">
         
-        <div class="ghost-title">DOMINÓ</div>
+        <div class="ghost-title">DOMINO</div>
 
-        <h1 class="main-title">Escolha o Nível</h1>
+        <h1 class="main-title">Choose a Level</h1>
 
         <div class="diff-options-grid">
             <a href="partida.html?dif=facil" class="diff-option" data-diff="facil">
@@ -409,9 +409,9 @@
                     <span class="star-off">★</span>
                     <span class="star-off">★</span>
                 </div>
-                <div class="diff-name">Fácil</div>
+                <div class="diff-name">Easy</div>
                 <div class="separator-line"></div>
-                <div class="diff-desc">Oponente joga de forma aleatória</div>
+                <div class="diff-desc">The opponent plays randomly</div>
             </a>
 
             <a href="partida.html?dif=medio" class="diff-option" data-diff="medio">
@@ -420,9 +420,9 @@
                     <span class="star">★</span>
                     <span class="star-off">★</span>
                 </div>
-                <div class="diff-name">Médio</div>
+                <div class="diff-name">Medium</div>
                 <div class="separator-line"></div>
-                <div class="diff-desc">Descarta peças pesadas e duplas</div>
+                <div class="diff-desc">Prioritizes high-value tiles and doubles</div>
             </a>
 
             <a href="partida.html?dif=dificil" class="diff-option" data-diff="dificil">
@@ -431,9 +431,9 @@
                     <span class="star">★</span>
                     <span class="star">★</span>
                 </div>
-                <div class="diff-name">Difícil</div>
+                <div class="diff-name">Hard</div>
                 <div class="separator-line"></div>
-                <div class="diff-desc">Calcula pontas, bloqueia e trava o jogo</div>
+                <div class="diff-desc">Calculates open ends and uses blocking strategies</div>
             </a>
         </div>
 
