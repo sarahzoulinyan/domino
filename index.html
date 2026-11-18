@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Dominó - Meu Jogo</title>
+    <title>Domino - My Game</title>
     
     <!-- ===== CORREÇÃO DO ZOOM NO SAFARI (iOS) ===== -->
     <script>
@@ -924,7 +924,7 @@
     <header>
         <div class="logo-wrapper" id="logoWrapper">
             <div class="logo" id="logoButton">
-                <img src="marcadaagua.png" alt="Marca d'água">
+                <img src="marcadaagua.png" alt="Watermark">
             </div>
             
             <div class="logo-card" id="logoCard">
@@ -933,19 +933,19 @@
                         <span class="name-white">Pablo</span><span class="name-gold">G</span><span class="name-white">.Dev</span>
                         <span class="arrow">↗</span>
                     </div>
-                    <span class="logo-card-sub">Desenvolvido por</span>
+                    <span class="logo-card-sub">Developed by</span>
                 </div>
             </div>
         </div>
 
         <nav id="mainNav">
-            <button class="nav-icon audio-button" id="audioButton" aria-label="Ativar música" type="button">
+            <button class="nav-icon audio-button" id="audioButton" aria-label="Turn music on" type="button">
                 <svg id="audioIcon" viewBox="0 0 24 24">
                     <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.99 7.86-7 8.77v-2.06c2.89-.86 5-3.54-5-6.71s2.11-5.85 5-6.71z"/>
                 </svg>
             </button>
 
-            <a href="#" class="nav-icon" aria-label="Configurações">
+            <a href="#" class="nav-icon" aria-label="Settings">
                 <svg viewBox="0 0 24 24">
                     <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
                 </svg>
@@ -959,15 +959,15 @@
 
     <!-- Área Principal -->
     <main>
-        <h1 class="background-title">DOMINÓ</h1>
+        <h1 class="background-title">DOMINO</h1>
 
         <div class="center-buttons">
-            <button class="btn-play" onclick="window.location.href='jogo.html'">Jogar</button>
-            <button class="btn-how" onclick="window.location.href='como-jogar.html'">Como jogar</button>
+            <button class="btn-play" onclick="window.location.href='jogo.html'">Play</button>
+            <button class="btn-how" onclick="window.location.href='como-jogar.html'">How to Play</button>
         </div>
 
         <div class="character-container">
-            <img src="image.webp" alt="Dominó">
+            <img src="image.webp" alt="Domino">
         </div>
 
     </main>
@@ -975,7 +975,7 @@
     <!-- ===== MODAL DE PERSONALIZAÇÃO ===== -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal-content">
-            <h2 class="modal-title">Escolha seu Avatar</h2>
+            <h2 class="modal-title">Choose Your Avatar</h2>
 
             <div class="avatar-preview">
                 <div class="nav-avatar" id="modalPreview">
@@ -983,7 +983,7 @@
                 </div>
             </div>
 
-            <div class="avatar-options-label">Selecione um avatar</div>
+            <div class="avatar-options-label">Select an avatar</div>
             <div class="avatar-options" id="avatarOptions">
                 <div class="avatar-option" data-avatar="1" onclick="selectAvatar(1, this)">
                     <img src="avatar1.png" alt="Avatar 1">
@@ -1000,11 +1000,11 @@
             </div>
 
             <div class="modal-buttons">
-                <button class="btn-close-modal" onclick="closeModal()">Cancelar</button>
-                <button class="btn-save" onclick="saveAvatar()">Salvar</button>
+                <button class="btn-close-modal" onclick="closeModal()">Cancel</button>
+                <button class="btn-save" onclick="saveAvatar()">Save</button>
             </div>
 
-            <p class="modal-hint">Clique no avatar para personalizar • Os arquivos devem estar na mesma pasta</p>
+            <p class="modal-hint">Click an avatar to personalize • The files must be in the same folder</p>
         </div>
     </div>
 
@@ -1195,11 +1195,11 @@
             if (!backgroundMusic.paused) {
                 audioButton.classList.add('playing');
                 audioButton.classList.remove('muted');
-                audioButton.setAttribute('aria-label', 'Desativar música');
+                audioButton.setAttribute('aria-label', 'Turn music off');
             } else {
                 audioButton.classList.remove('playing');
                 audioButton.classList.add('muted');
-                audioButton.setAttribute('aria-label', 'Ativar música');
+                audioButton.setAttribute('aria-label', 'Turn music on');
             }
         }
 
@@ -1238,7 +1238,7 @@
                         updateAudioButton();
                     })
                     .catch(error => {
-                        console.log('Não foi possível iniciar a música:', error);
+                        console.log('Could not start the music:', error);
                     });
 
             } else {
